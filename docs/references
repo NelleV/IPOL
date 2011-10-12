@@ -1,0 +1,17 @@
+
+Affinity propagation:
+- Clustering by Passing Messages Between Data Points
+  (http://www.sciencemag.org/content/315/5814/972.short)
+- Hierarchical Affinity Propagation:
+http://www.psi.toronto.edu/publications/2011/HAP.pdf
+- http://www.psi.toronto.edu/index.php?q=affinity%20propagation
+
+Spectral clustering:
+- “On Spectral Clustering: Analysis and an algorithm” Andrew Y. Ng, Michael I.
+Jordan, Yair Weiss, 2001
+- “A Random Walks View of Spectral Segmentation” Marina Meila, Jianbo Shi,
+  2001
+
+Hierarchical clustering:
+
+
