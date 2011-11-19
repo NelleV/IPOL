@@ -16,7 +16,7 @@ the patches.
 
 
 A contrario block matching
---------------------------------------------------------------------------------
+================================================================================
 
 The a contrario methods uses a decision model based on the probability of two
 patches from two images being similar just by chance. Calculating this
@@ -32,7 +32,7 @@ rejected, even if the following components have good similarities.
 
 
 Self similarity method
---------------------------------------------------------------------------------
+================================================================================
 
 The a contrario model sets a global threshold to accept patches, independant
 from the rest of the matches. Most images containe repeated patterns, like
@@ -43,13 +43,13 @@ nearest neighbour and the second nearest neighbour.
 
 
 Examples and discussion
---------------------------------------------------------------------------------
+================================================================================
 
 Unfortunately, the demo computes the whole stereo pipeline, and not only the
 matches. It makes it hard to visualise exactly which matches are correct or
 wrong.
 
-As mentionned in [x], one of the major problems using these methods is the
+As mentionned in [1], one of the major problems using these methods is the
 adhesion effect. The matching being done on a neighborhood and not a single
 pixel, there is overlap between the real disparity and the disparity computed.
 This leads to a dilatation of the disparity map.
@@ -57,3 +57,12 @@ This leads to a dilatation of the disparity map.
 Reflexion can lead to errors in the computation of the disparity. Calculating
 the disparity on images taken in a mirror will not compute the distance to the
 mirror, but to the reflexion in the mirror.
+
+
+References
+================================================================================
+
+.. [1] Binocular stereo pipeline: Andres Almansa, Neus Sabater, Pascal Monasse,
+  Jean-Michel Morel
+
+

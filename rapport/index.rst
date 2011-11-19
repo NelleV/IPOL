@@ -9,9 +9,15 @@ Welcome to IPOL's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-    01_lsd.rst
+    01_lsd
+    02_sift
+    03_points_clouds
+    04_sift_matching
+    05_texture
+    06_flutter_shutter
+    07_block_matching
 
 
 Indices and tables
