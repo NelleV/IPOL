@@ -2,12 +2,17 @@
 Line Segment Detector
 ================================================================================
 
+Line Segment Detector
+================================================================================
 
-LSD is aimed at detecting segments in an image. The first step is to compute
-the level-line field. All pixels having the same level-line angle are
-clustered. Each cluster of point is then subjected to a validation procedure
-called a contrario, ensuring that the regions are not likely to be obtained "by
-change".
+Line Segment Detector (LSD) is aimed at detecting segments in an image. The
+first step is to compute the level-line field. All pixels having the same
+level-line angle are clustered. Each cluster of point is then subjected to a
+validation procedure called a contrario, ensuring that the regions are not
+likely to be obtained "by change".
+
+Testing and discussion
+================================================================================
 
 LSD performs really well on natural images, and quite well on most synthetised
 images.
