@@ -37,8 +37,11 @@ Flutter-shutter is a multi image acquisition system, resulting in a linear
 combination of  N images. Each image is taken with an exposure time smaller
 than :math:`\Delta{t}`, hence having an elementary blur negligible.
 
-Example and discussion
+.. TODO à finir
+
+Examples and discussion
 ================================================================================
 
+.. TODO a finir, mais n'ai pas trouvé la démo
 
 .. [1] Y Tendero, J-M Morel, N Rougé, "The Flutter Shutter Paradox"
