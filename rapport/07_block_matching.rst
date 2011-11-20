@@ -49,7 +49,7 @@ Unfortunately, the demo computes the whole stereo pipeline, and not only the
 matches. It makes it hard to visualise exactly which matches are correct or
 wrong.
 
-As mentionned in [1], one of the major problems using these methods is the
+As mentionned in [1]_, one of the major problems using these methods is the
 adhesion effect. The matching being done on a neighborhood and not a single
 pixel, there is overlap between the real disparity and the disparity computed.
 This leads to a dilatation of the disparity map.
@@ -58,9 +58,6 @@ Reflexion can lead to errors in the computation of the disparity. Calculating
 the disparity on images taken in a mirror will not compute the distance to the
 mirror, but to the reflexion in the mirror.
 
-
-References
-================================================================================
 
 .. [1] Binocular stereo pipeline: Andres Almansa, Neus Sabater, Pascal Monasse,
   Jean-Michel Morel

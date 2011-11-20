@@ -22,7 +22,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = []
+extensions = ['sphinx.ext.pngmath']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -172,7 +172,7 @@ htmlhelp_basename = 'IPOLdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'IPOL.tex', u'IPOL Documentation',
+  ('index', 'IPOL.tex', u'IPOL',
    u'Nelle Varoquaux', 'manual'),
 ]
 
@@ -185,7 +185,11 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+
+latex_preamble = """
+\usepackage{amsmath}\usepackage{amsfonts}\usepackage{bm}\usepackage{morefloats}
+"""
+
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []

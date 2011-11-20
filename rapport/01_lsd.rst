@@ -11,7 +11,7 @@ level-line angle are clustered. Each cluster of point is then subjected to a
 validation procedure called a contrario, ensuring that the regions are not
 likely to be obtained "by change".
 
-Testing and discussion
+Examples and discussion
 ================================================================================
 
 LSD performs really well on natural images, and quite well on most synthetised
