@@ -2,3 +2,5 @@
 A scale space approach  to the processing of point clouds
 ================================================================================
 
+.. TODO to finish
+

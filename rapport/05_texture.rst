@@ -39,7 +39,7 @@ to ensure the periodicity of the image.
 
 .. TODO finish this
 
-Testing and discussion
+Examples and discussion
 ================================================================================
 
 RPN is an extremely fast texture synthesis algorithm (2 FFT), visually stable,
