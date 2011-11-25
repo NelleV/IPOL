@@ -25,6 +25,7 @@ Noise (RPN) and Asymptotic Discrete Spot Noise (ADSN) gives similar results,
 despite of their theoretical differences.
 
 .. figure:: images/05_textures_sinusoidal.png
+  :scale: 75 %
 
   Differences of the outcome on a bisinusoidale image using RPN and ADSN
 
@@ -49,7 +50,8 @@ visually similar results, but no online demo are available. The following
 images have therefore only been tested using RPN.
 
 .. figure:: images/800x-plage_microtextures_thumbs.jpg
-  
+  :scale: 75 %
+
   Examples obtained using RPN on a natural images
 
 
