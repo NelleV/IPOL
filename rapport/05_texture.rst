@@ -20,7 +20,7 @@ texture.
 Random Phase Noise and Asymptotic Discrete Spot Noise
 ================================================================================
 
-After extending algorithms to colour images, [1]_ argues that Random Phase
+After extending algorithms to color images, [1]_ argues that Random Phase
 Noise (RPN) and Asymptotic Discrete Spot Noise (ADSN) gives similar results,
 despite of their theoretical differences.
 
@@ -31,7 +31,7 @@ despite of their theoretical differences.
 
 [1]_ underlines the difference between RPN and ADSN on bisinusoidal images.
 
-Artefacts due to non peridocity
+Artifacts due to non peridocity
 ================================================================================
 
 FFT assume the periodicity of the input. Images have discontinuities located
@@ -59,6 +59,15 @@ Unfortunately, the algorithm is not robust to non stationarities: it does not
 work for macro textures, which have a strong geometry. Yet, macro textured
 objects can be seen as a micro texture from a critical distance.
 
+.. figure:: images/05_bois_map.png
+  :scale: 50 %
+
+  Wood
+
+.. figure:: images/05_liege_map.png
+   :scale: 50 %
+
+   Cork
 
 .. [1] B Galerne, Y Gousseau, J-M Morel. "Micro-Texture Synthesis by
   Phase Randomization", *Image Processing On Line**, 2011.

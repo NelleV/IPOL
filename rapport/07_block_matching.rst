@@ -37,10 +37,12 @@ Self similarity method
 The a contrario model sets a global threshold to accept patches, independent
 from the rest of the matches. Most images contains repeated patterns, like
 windows or doors: the a contrario model does not learn those repetition,
-which leads to numerous wrong patches. As proposed by Lowe [the sift method],
+which leads to numerous wrong patches. As proposed by Lowe [1]_,
 another threshold can be set using the ratio between the distance of the
 nearest neighbor and the second nearest neighbor.
 
+.. [1] "Object recognition from local scale-invariant features" Lowe, David C
+   (1999)
 
 Examples and discussion
 ================================================================================
@@ -49,7 +51,7 @@ Unfortunately, the demo computes the whole stereo pipeline, and not only the
 matches. It makes it hard to visualize exactly which matches are correct or
 wrong.
 
-As mentioned in [1]_, one of the major problems using these methods is the
+As mentioned in [2]_, one of the major problems using these methods is the
 adhesion effect. The matching being done on a neighborhood and not a single
 pixel, there is overlap between the real disparity and the disparity computed.
 This leads to a dilatation of the disparity map.
@@ -58,10 +60,13 @@ Reflexion can lead to errors in the computation of the disparity. Calculating
 the disparity on images taken in a mirror will not compute the distance to the
 mirror, but to the reflexion in the mirror.
 
-I found it hard to test this method on images of my own. Hence, I used
-examples provided by the article.
+.. figure:: images/07_images_map.png
+   :scale: 90 %
 
-.. [1] Binocular stereo pipeline: Andres Almansa, Neus Sabater, Pascal Monasse,
+   We can see on this image the dilatation due to the adhesion image, on the
+   side of the building.
+
+.. [2] Binocular stereo pipeline: Andres Almansa, Neus Sabater, Pascal Monasse,
   Jean-Michel Morel
 
 
