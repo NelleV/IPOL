@@ -1,4 +1,4 @@
 all: affinity_propagation
 
 affinity_propagation:
-	cc -03 -o affinity_propagation  affinity_propagation.c
+	g++ -O3 -o affinity_propagation  ap.c affinity_propagation.cpp
