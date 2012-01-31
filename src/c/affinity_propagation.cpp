@@ -1,6 +1,13 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "globals.h"
+#include "affinity_propagation.h"
+
 // FIXME Should probably pass a reference of the image
 // FIXME Add a tolerance value
-int affinity_propagation(double * similarity, double lambda, int max_iter){
+int * affinity_propagation(double * similarity, int length, double lambda, int max_iter){
 
   // Check parameters
   if(lambda >= 1 || lambda <= 0){
@@ -14,15 +21,13 @@ int affinity_propagation(double * similarity, double lambda, int max_iter){
   double * availability = NULL;
   double * responsability = NULL;
 
-  // FIXME get size of matrix
-
-  for(int it = 0; it < max_iter; i++){
+  for(int it = 0; it < max_iter; it++){
     // Compute responsability
     for(int i = 0; i < length; i++){
       double * AS = NULL;
       for(int j = 0; j < length; j++){
         int index = length * i + j;
-        AS = availability[index] + similarity[index]
+        AS[j] = availability[index] + similarity[index];
       }
 
       for(int j = 0; j < length; j++){
@@ -35,9 +40,8 @@ int affinity_propagation(double * similarity, double lambda, int max_iter){
           if(k == j){
             continue;
           }
-          int ind = length * i + k;
-          if(AS[ind] > max){
-              max = AS[ind];
+          if(AS[k] > max){
+              max = AS[k];
           }
         }
         responsability[index] = lambda * responsability[index] - (1 - lambda) * (similarity[index] + max);
@@ -46,7 +50,7 @@ int affinity_propagation(double * similarity, double lambda, int max_iter){
 
     // Compute availability
     for(int i = 0; it < max_iter; i++){
-      for(int j = 0; j < length, j++){
+      for(int j = 0; j < length; j++){
         int index = length * i + j;
         double sum = 0.;
 
@@ -60,12 +64,10 @@ int affinity_propagation(double * similarity, double lambda, int max_iter){
           }
         }
 
+        double a = responsability[(j + 1) * length] + sum;
         if(i == j){
-          double a = sum;
-        } else {
-          double a = responsability[(j + 1) * length] + sum;
+          a = sum;
         }
-
         if(a < 0){
           a = 0;
         }
