@@ -7,8 +7,8 @@
 
 // FIXME Should probably pass a reference of the image
 // FIXME Add a tolerance value
-unsigned int * affinity_propagation(double * similarity,
-    unsigned int length, double lambda, int max_iter){
+void affinity_propagation(double * similarity,
+    unsigned int length, unsigned int exemplar[], double lambda, int max_iter){
   // Check parameters
 //  if(lambda > (double) 0. && lambda < (double) 1.){
 //    error("Damping value lambda should be in range (0, 1)");
@@ -81,17 +81,16 @@ unsigned int * affinity_propagation(double * similarity,
   }
 
   // Compute the exemplars
-  unsigned int exemplar[length];
   for(unsigned int i = 0; i < length; i++){
     double max = availability[length * i];
     exemplar[i] = length * i;
-    for(unsigned int j = 1; j < length; j++){
-      int index = length * i + j;
+    for(unsigned int j = 0; j < length; j++){
+      unsigned int index = length * i + j;
       if(availability[index] + similarity[index] > max){
         max = availability[index] + similarity[index];
-        exemplar[i] = index;
+        exemplar[i] = j;
       }
     }
+    printf("index %d, result %d \n", i, exemplar[i]);
   }
-  return exemplar;
 }

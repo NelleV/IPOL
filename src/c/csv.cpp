@@ -60,10 +60,16 @@ CSVWriter::~CSVWriter(){
   this->file.close();
 }
 
-bool CSVWriter::write(unsigned int * result, unsigned int num_line){
+bool CSVWriter::write(unsigned int result[], unsigned int num_line){
+
+
   for(unsigned int i = 0; i < num_line; i++){
     char buffer[100];
-    sprintf(buffer, "%d\n", result[i]);
-    this->file.write(buffer, 100);
+    sprintf(buffer, "%u\n\0", result[i]);
+    unsigned int j = 0;
+    while(buffer[j] != '\0'){
+      j++;
+    }
+    this->file.write(buffer, j);
   }
 }

@@ -3,7 +3,7 @@
 #include "globals.h"
 #include "csv.h"
 
-struct options {
+struct options{
   char file_name[FILENAME_MAX];
   int lambda;
 };
@@ -51,6 +51,11 @@ int main(int argc, char ** argv){
   struct options opts = get_default_options();
   get_args(&opts, argc, argv);
   CSVReader reader(opts.file_name);
+
   double * matrix = reader.parse_lines(" ");
-  unsigned int * results = affinity_propagation(matrix, reader.num_line, 0.5, 300);
+
+  unsigned int results [reader.num_line];
+  affinity_propagation(matrix, reader.num_line, results, 0.5, 300);
+  CSVWriter writer("output");
+  writer.write(results, reader.num_line);
 }
