@@ -18,7 +18,6 @@ bool CSVReader::load_file(){
   this->file.read(this->line, length);
 }
 
-
 bool CSVReader::next(){
   this->file.getline(this->line, MAX_LENGTH);
   if(!this->file.eof()){
@@ -28,7 +27,6 @@ bool CSVReader::next(){
     return false;
   }
 }
-
 
 bool CSVReader::parse_line(const string& delimiters){
   string str(this->line);
@@ -51,4 +49,21 @@ double * CSVReader::parse_lines(const string& delimiters){
     this->parse_line(delimiters);
   }
   return this->matrix;
+}
+
+
+CSVWriter::CSVWriter(const char * file_name){
+  this->file.open(file_name);
+}
+
+CSVWriter::~CSVWriter(){
+  this->file.close();
+}
+
+bool CSVWriter::write(unsigned int * result, unsigned int num_line){
+  for(unsigned int i = 0; i < num_line; i++){
+    char buffer[100];
+    sprintf(buffer, "%d\n", result[i]);
+    this->file.write(buffer, 100);
+  }
 }
