@@ -12,7 +12,6 @@ using namespace std;
 // FIXME Add a tolerance value
 void affinity_propagation(double * similarity,
     unsigned int length, unsigned int exemplar[], double lambda, int max_iter){
-  printf("Computing Affinity propagation\n");
 
   // Check parameters
 //  if(lambda > (double) 0. && lambda < (double) 1.){
@@ -33,7 +32,6 @@ void affinity_propagation(double * similarity,
   }
 
   double preference = quicksort(*similarity_co, 0, length * length);
-  cout << "preference : " << preference << endl;
 
   // Place preference on the diagonal of S
   for(unsigned int i = 0; i < length; i++){
@@ -53,7 +51,6 @@ void affinity_propagation(double * similarity,
   }
 
   for(unsigned int it = 0; it < max_iter; it++){
-    cout << '.' << flush;
     // Compute responsability
     for(unsigned int i = 0; i < length; i++){
       double AS[length];
@@ -104,21 +101,19 @@ void affinity_propagation(double * similarity,
         if(i == j){
           a = sum;
         }else{
-          a = responsability[j][j] - sum;
+          a = responsability[j][j] + sum;
           if(a > 0){
             a = 0;
           }
         }
 
         availability[i][j] = lambda * availability[i][j] + (1 - lambda) * a;
-        printf("%d, %d %f %f %f\n", i, j, availability[i][j], responsability[i][j], sum);
       }
     } // availability
 
     // TODO Should break out of loop if converged sooner.
   }
 
-  cout << endl;
   // Compute the exemplars
   for(unsigned int i = 0; i < length; i++){
     double max = availability[i][0] + responsability[i][0];
@@ -129,6 +124,5 @@ void affinity_propagation(double * similarity,
         exemplar[i] = j;
       }
     }
-    printf("index %d, result %d, max %f \n", i, exemplar[i], max);
   }
 }
