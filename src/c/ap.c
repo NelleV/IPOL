@@ -1,4 +1,8 @@
 #include <cstring>
+#include <iostream>
+
+using namespace std;
+
 #include "affinity_propagation.h"
 #include "globals.h"
 #include "csv.h"
@@ -12,7 +16,7 @@ void print_usage();
 
 struct options get_default_options() {
   struct options opts;
-  opts.lambda = 0.25;
+  opts.lambda = 0.9;
 
   return opts;
 }
@@ -50,12 +54,14 @@ void print_usage() {
 int main(int argc, char ** argv){
   struct options opts = get_default_options();
   get_args(&opts, argc, argv);
+  cout << "Reading input file" << endl << flush;
   CSVReader reader(opts.file_name);
 
   double * matrix = reader.parse_lines(" ");
 
   unsigned int results [reader.num_line];
-  affinity_propagation(matrix, reader.num_line, results, 0.5, 300);
-  CSVWriter writer("output");
+  affinity_propagation(matrix, reader.num_line, results, 0.5, 200);
+  cout << "here" << endl;
+  CSVWriter writer("output.csv");
   writer.write(results, reader.num_line);
 }

@@ -1,5 +1,6 @@
 #include "csv.h"
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
@@ -61,9 +62,8 @@ CSVWriter::~CSVWriter(){
 }
 
 bool CSVWriter::write(unsigned int result[], unsigned int num_line){
-
-
   for(unsigned int i = 0; i < num_line; i++){
+    cout << i <<  " " << result[i] << endl;
     char buffer[100];
     sprintf(buffer, "%u\n\0", result[i]);
     unsigned int j = 0;
