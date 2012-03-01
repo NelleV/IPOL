@@ -188,14 +188,14 @@ void hierachical_affinity_propagation(double * similarity,
           }
           tau[l + 1][j] = similarity[j * length + j] + responsability[l][j][j] + sum;
         }
-        
+
         if(l > 0){
           double AS[length];
           for(unsigned int k = 0; k < length; k++){
             if(k == j){
-              AS[i] = availability[l][j][k];
+              AS[k] = availability[l][j][k];
             }else{
-              AS[i] = availability[l][j][k] + similarity[j * length + k];
+              AS[k] = availability[l][j][k] + similarity[j * length + k];
             }
           }
 
@@ -207,84 +207,86 @@ void hierachical_affinity_propagation(double * similarity,
           }
         }
       }
+
+      // Compute responsability
+      for(unsigned int i = 0; i < length; i++){
+        double AS[length];
+        for(unsigned int j = 0; j < length; j++){
+          AS[j] = availability[l][i][j] + similarity[i * length + j];
+        }
+
+        for(unsigned int j = 0; j < length; j++){
+          unsigned int index = length * i + j;
+
+          // Get max of AS
+          double max = 0.;
+          if(j == 0){
+            max = AS[1];
+          }else{
+            max = AS[0];
+          }
+
+          for(unsigned int k = 0; k < length; k++){
+            if(k == j){
+              continue;
+            }
+            if(AS[k] >= max){
+              max = AS[k];
+            }
+          }
+          max = - max;
+          if(max > tau[l][i]){
+            max = tau[l][i];
+          }
+
+          responsability[l][i][j] = lambda * responsability[l][i][j] +
+                              (1 - lambda) * (similarity[index] + max);
+        }
+      }
+
+      // Compute availability
+      for(unsigned int i = 0; i < length; i++){
+        for(unsigned int j = 0; j < length; j++){
+          double sum = 0.;
+
+          for(unsigned int k = 0; k < length; k++){
+            if(k == i || k == j){
+              continue;
+            }
+            if(responsability[l][k][j] > 0.){
+              sum = sum + responsability[l][k][j];
+            }
+          }
+
+          double a = 0;
+          if(i == j){
+            a = sum;
+          }else{
+            a = responsability[l][j][j] + sum;
+            if(a > 0){
+              a = 0;
+            }
+          }
+
+          availability[l][i][j] = lambda * availability[l][i][j] + (1 - lambda) * a;
+        }
+      } // availability
+
+      // TODO Should break out of loop if converged sooner.
     }
 
-
-    // Compute responsability
-    for(unsigned int i = 0; i < length; i++){
-      double AS[length];
-      for(unsigned int j = 0; j < length; j++){
-        AS[j] = availability[l][i][j] + similarity[i * length + j];
-      }
-
-      for(unsigned int j = 0; j < length; j++){
-        unsigned int index = length * i + j;
-
-        // Get max of AS
-        double max = 0.;
-        if(j == 0){
-          max = AS[1];
-        }else{
-          max = AS[0];
-        }
-
-        for(unsigned int k = 0; k < length; k++){
-          if(k == j){
-            continue;
-          }
-          if(AS[k] >= max){
-            max = AS[k];
-          }
-        }
-        max = - max;
-        if(max > tau[l][i]){
-          max = tau[l][i];
-        }
-
-        responsability[i][j] = lambda * responsability[i][j] +
-                            (1 - lambda) * (similarity[index] + max);
-      }
-    }
-
-    // Compute availability
-    for(unsigned int i = 0; i < length; i++){
-      for(unsigned int j = 0; j < length; j++){
-        double sum = 0.;
-
-        for(unsigned int k = 0; k < length; k++){
-          if(k == i || k == j){
-            continue;
-          }
-          if(responsability[k][j] > 0.){
-            sum = sum + responsability[k][j];
-          }
-        }
-
-        double a = 0;
-        if(i == j){
-          a = sum;
-        }else{
-          a = responsability[j][j] + sum;
-          if(a > 0){
-            a = 0;
-          }
-        }
-
-        availability[i][j] = lambda * availability[i][j] + (1 - lambda) * a;
-      }
-    } // availability
-
-    // TODO Should break out of loop if converged sooner.
   }
 
   // Compute the exemplars
-  for(unsigned int i = 0; i < length; i++){
-    double max = availability[i][0] + responsability[i][0];
-    exemplar[i] = 0;
-    for(unsigned int j = 0; j < length; j++){
-      if(availability[i][j] + responsability[i][j] > max){
-        max = availability[i][j] + responsability[i][j];
-        exemplar[i] = j;
+  for(unsigned int l = 0; l < n_layers; l++){
+    for(unsigned int i = 0; i < length; i++){
+      double max = availability[l][i][0] + responsability[l][i][0];
+      exemplar[i] = 0;
+      for(unsigned int j = 0; j < length; j++){
+        if(availability[l][i][j] + responsability[l][i][j] > max){
+          max = availability[l][i][j] + responsability[l][i][j];
+          exemplar[i] = j;
+        }
       }
     }
   }
