@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+
+#include <algorithm>
 using namespace std;
 #include "globals.h"
 #include "affinity_propagation.h"
@@ -10,7 +12,7 @@ using namespace std;
 
 // FIXME Should probably pass a reference of the image
 // FIXME Add a tolerance value
-void affinity_propagation(double * similarity,
+void affinity_propagation(vector<double> similarity,
     unsigned int length, unsigned int exemplar[], double lambda, int max_iter){
 
   // Check parameters
@@ -24,14 +26,15 @@ void affinity_propagation(double * similarity,
   // Compute preferences
   //
   // Need to copy the similarity array to sort it, in order to get the median
-  double similarity_co[length][length];
+  vector<double> similarity_co;
   for(unsigned int i = 0; i < length; i++){
     for(unsigned j = 0; j < length; j++){
-      similarity_co[i][j] = similarity[i * length + j];
+      similarity_co.push_back(similarity[i * length + j]);
     }
   }
 
-  double preference = quicksort(*similarity_co, 0, length * length);
+  sort(similarity_co.begin(), similarity_co.begin() + length * length);
+  double preference = similarity_co[length * length / 2];
 
   // Place preference on the diagonal of S
   for(unsigned int i = 0; i < length; i++){
@@ -39,14 +42,14 @@ void affinity_propagation(double * similarity,
   }
 
   // Availabity and responsability
-  double availability[length][length];
-  double responsability[length][length];
+  vector<double> availability;
+  vector<double> responsability;
 
   // Let's initialise:
   for(unsigned int i = 0; i < length; i++){
     for(unsigned int j = 0; j < length; j++){
-      availability[i][j] = 0;
-      responsability[i][j] = 0;
+      availability.push_back(0);
+      responsability.push_back(0);
     }
   }
 
@@ -55,7 +58,7 @@ void affinity_propagation(double * similarity,
     for(unsigned int i = 0; i < length; i++){
       double AS[length];
       for(unsigned int j = 0; j < length; j++){
-        AS[j] = availability[i][j] + similarity[i * length + j];
+        AS[j] = availability[i * length + j] + similarity[i * length + j];
       }
 
       for(unsigned int j = 0; j < length; j++){
@@ -78,7 +81,7 @@ void affinity_propagation(double * similarity,
           }
         }
 
-        responsability[i][j] = lambda * responsability[i][j] +
+        responsability[i * length + j] = lambda * responsability[i * length + j] +
                             (1 - lambda) * (similarity[index] - max);
       }
     }
@@ -92,8 +95,8 @@ void affinity_propagation(double * similarity,
           if(k == i || k == j){
             continue;
           }
-          if(responsability[k][j] > 0.){
-            sum = sum + responsability[k][j];
+          if(responsability[k * length + j] > 0.){
+            sum = sum + responsability[k * length + j];
           }
         }
 
@@ -101,13 +104,13 @@ void affinity_propagation(double * similarity,
         if(i == j){
           a = sum;
         }else{
-          a = responsability[j][j] + sum;
+          a = responsability[j * length + j] + sum;
           if(a > 0){
             a = 0;
           }
         }
 
-        availability[i][j] = lambda * availability[i][j] + (1 - lambda) * a;
+        availability[i * length + j] = lambda * availability[i * length + j] + (1 - lambda) * a;
       }
     } // availability
 
@@ -116,11 +119,11 @@ void affinity_propagation(double * similarity,
 
   // Compute the exemplars
   for(unsigned int i = 0; i < length; i++){
-    double max = availability[i][0] + responsability[i][0];
+    double max = availability[i * length + 0] + responsability[i * length + 0];
     exemplar[i] = 0;
     for(unsigned int j = 0; j < length; j++){
-      if(availability[i][j] + responsability[i][j] > max){
-        max = availability[i][j] + responsability[i][j];
+      if(availability[i * length + j] + responsability[i * length + j] > max){
+        max = availability[i * length + j] + responsability[i * length + j];
         exemplar[i] = j;
       }
     }

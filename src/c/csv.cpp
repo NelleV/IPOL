@@ -37,7 +37,7 @@ bool CSVReader::parse_line(const string& delimiters){
 
   while(string::npos != pos || string::npos != last_pos){
     substring = str.substr(last_pos, pos - last_pos);
-    this->matrix[this->index] = atof(substring.c_str());
+    this->matrix.push_back(atof(substring.c_str()));
     last_pos = str.find_first_not_of(delimiters, pos);
     pos = str.find_first_of(delimiters, last_pos);
     this->index++;
@@ -45,7 +45,7 @@ bool CSVReader::parse_line(const string& delimiters){
   return true;
 }
 
-double * CSVReader::parse_lines(const string& delimiters){
+vector<double> CSVReader::parse_lines(const string& delimiters){
   while(this->next()){
     this->parse_line(delimiters);
   }

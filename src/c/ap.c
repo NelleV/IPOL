@@ -1,6 +1,6 @@
 #include <cstring>
 #include <iostream>
-
+#include <vector>
 using namespace std;
 
 #include "affinity_propagation.h"
@@ -57,9 +57,10 @@ int main(int argc, char ** argv){
   cout << "Reading input file" << endl << flush;
   CSVReader reader(opts.file_name);
 
-  double * matrix = reader.parse_lines(" ");
+  vector<double> matrix = reader.parse_lines(" ");
 
   unsigned int results [reader.num_line];
+  cout << "Affinity Propagation" << endl << flush;
   affinity_propagation(matrix, reader.num_line, results, 0.5, 200);
   cout << "here" << endl;
   CSVWriter writer("output.csv");
