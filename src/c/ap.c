@@ -59,10 +59,10 @@ int main(int argc, char ** argv){
 
   vector<double> matrix = reader.parse_lines(" ");
 
-  unsigned int results [reader.num_line];
+  unsigned int results [reader.num_line * 8];
   cout << "Affinity Propagation" << endl << flush;
-  affinity_propagation(matrix, reader.num_line, results, 0.5, 200);
-  cout << "here" << endl;
+  hierarchical_affinity_propagation(matrix, reader.num_line,
+            8, results, 0.5, 200);
   CSVWriter writer("output.csv");
-  writer.write(results, reader.num_line);
+  writer.write(results, reader.num_line, 8);
 }

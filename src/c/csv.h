@@ -22,7 +22,9 @@ class CSVWriter {
   public:
     CSVWriter(const char * file_name);
     ~CSVWriter();
-    bool write(unsigned int result[], unsigned int num_line);
+    bool write(unsigned int result[],
+               unsigned int num_line,
+               unsigned int n_layers);
 
   private:
     std::ofstream file;

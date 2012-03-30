@@ -61,15 +61,24 @@ CSVWriter::~CSVWriter(){
   this->file.close();
 }
 
-bool CSVWriter::write(unsigned int result[], unsigned int num_line){
+bool CSVWriter::write(unsigned int result[],
+                      unsigned int num_line,
+                      unsigned int n_layers){
+
   for(unsigned int i = 0; i < num_line; i++){
-    cout << i <<  " " << result[i] << endl;
-    char buffer[100];
-    sprintf(buffer, "%u\n\0", result[i]);
-    unsigned int j = 0;
-    while(buffer[j] != '\0'){
-      j++;
+    for(unsigned int l = 0; l < n_layers; l++){
+      char buffer[100];
+      if(l == n_layers - 1){
+        sprintf(buffer, "%u\n\0", result[i + l * num_line]);
+      }else{
+        sprintf(buffer, "%u \0", result[i + l * num_line]);
+      }
+      unsigned int j = 0;
+      while(buffer[j] != '\0'){
+        j++;
+      }
+
+      this->file.write(buffer, j);
     }
-    this->file.write(buffer, j);
   }
 }
