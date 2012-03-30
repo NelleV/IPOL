@@ -132,7 +132,7 @@ void affinity_propagation(vector<double> similarity,
 void hierarchical_affinity_propagation(vector<double> similarity,
     unsigned int length, unsigned int exemplar[], double lambda, int max_iter){
 
-  unsigned int n_layers = 8;
+  unsigned int n_layers = 1;
   // Compute preferences
   //
   // Need to copy the similarity array to sort it, in order to get the median
@@ -161,7 +161,7 @@ void hierarchical_affinity_propagation(vector<double> similarity,
   vector<vector<double> > responsabilities;
 
   // Let's initialise:
-  for(unsigned int l = 0; l < length; l++){
+  for(unsigned int l = 0; l < n_layers; l++){
     vector<double> availability;
     vector<double> responsability;
     for(unsigned int i = 0; i < length; i++){
@@ -176,10 +176,9 @@ void hierarchical_affinity_propagation(vector<double> similarity,
 
   for(unsigned int it = 0; it < max_iter; it++){
 
-
     vector<vector<double> > tau;
 
-    for(unsigned int l = 0; l < n_layers; l++){
+    for(unsigned int l = 0; l < n_layers - 1; l++){
       for(unsigned int j = 0; j < length; j++){
         // calculate sum.
         double sum = 0;
@@ -197,94 +196,173 @@ void hierarchical_affinity_propagation(vector<double> similarity,
     }
 
     vector<vector<double> > phi;
-    for(unsigned int l = length - 1; length >= 0; l--){
+    for(unsigned int l = n_layers - 1; l <= 0; l--){
       for(unsigned int j = 0; j < length; j++){
+
         double max = availabilities[l][j * length] + similarity[j * length];
+
         for(unsigned int k = 1; k < length; k++){
+
           if(availabilities[l][j * length + k] + similarity[j * length + k] > max){
             max = availabilities[l][j * length + k] + similarity[j * length + k];
           }
         }
       }
+      // FIXME
     }
 
 
     for(unsigned int l = 0; l < n_layers; l++){
       // Compute responsability
-      for(unsigned int i = 0; i < length; i++){
-        double AS[length];
-        for(unsigned int j = 0; j < length; j++){
-          AS[j] = availabilities[l][i * length + j] + similarity[i * length + j];
+      if(l == 0){
+        for(unsigned int i = 0; i < length; i++){
+          double AS[length];
+          for(unsigned int j = 0; j < length; j++){
+            AS[j] = availabilities[l][i * length + j] + similarity[i * length + j];
+          }
+          AS[i] = AS[i] + preferences[l][i];
+
+          for(unsigned int j = 0; j < length; j++){
+            unsigned int index = length * i + j;
+
+            // Get max of AS
+            double max = 0.;
+            if(j == 0){
+              max = AS[1];
+            }else{
+              max = AS[0];
+            }
+
+            for(unsigned int k = 0; k < length; k++){
+              if(k == j){
+                continue;
+              }
+              if(AS[k] >= max){
+                max = AS[k];
+              }
+            }
+
+            if(i == j) {
+              responsabilities[l][i * length + j] = lambda * 
+                                                  responsabilities[l][i * length + j] +
+                                               (1 - lambda) * (preferences[l][i] - max);
+
+            } else {
+              responsabilities[l][i * length + j] = lambda * 
+                                                  responsabilities[l][i * length + j] +
+                                               (1 - lambda) * (similarity[index] - max);
+            }
+          }
         }
-
-        for(unsigned int j = 0; j < length; j++){
-          unsigned int index = length * i + j;
-
-          // Get max of AS
-          double max = 0.;
-          if(j == 0){
-            max = AS[1];
-          }else{
-            max = AS[0];
+      } else {
+        for(unsigned int i = 0; i < length; i++){
+          double AS[length];
+          for(unsigned int j = 0; j < length; j++){
+            AS[j] = availabilities[l][i * length + j] + similarity[i * length + j];
           }
 
-          for(unsigned int k = 0; k < length; k++){
-            if(k == j){
-              continue;
+          for(unsigned int j = 0; j < length; j++){
+            unsigned int index = length * i + j;
+
+            // Get max of AS
+            double max = 0.;
+            if(j == 0){
+              max = AS[1];
+            }else{
+              max = AS[0];
             }
-            if(AS[k] >= max){
-              max = AS[k];
-            }
-          }
-          max = - max;
 
-          if(tau[l][i] < max){
-            max = tau[l][i];
+            for(unsigned int k = 0; k < length; k++){
+
+              if(k == j){
+                continue;
+              }
+              if(AS[k] >= max){
+                max = AS[k];
+              }
+            }
+            max = - max;
+
+            if(tau[l][i] < max){
+              max = tau[l][i];
+            }
+            responsabilities[l][i * length + j] = lambda * responsabilities[l][i * length + j] +
+                                (1 - lambda) * (similarity[index] + max);
           }
-          responsabilities[0][i * length + j] = lambda * responsabilities[0][i * length + j] +
-                              (1 - lambda) * (similarity[index] + max);
         }
       }
 
       // Compute availability
-      for(unsigned int i = 0; i < length; i++){
-        for(unsigned int j = 0; j < length; j++){
-          double sum = 0.;
+      if(l == n_layers - 1) {
+        for(unsigned int i = 0; i < length; i++){
+          for(unsigned int j = 0; j < length; j++){
+            double sum = 0.;
 
-          for(unsigned int k = 0; k < length; k++){
-            if(k == i || k == j){
-              continue;
+            for(unsigned int k = 0; k < length; k++){
+              if(k == i || k == j){
+                continue;
+              }
+              if(responsabilities[l][k * length + j] > 0.){
+                sum = sum + responsabilities[l][k * length + j];
+              }
             }
-            if(responsabilities[0][k * length + j] > 0.){
-              sum = sum + responsabilities[0][k * length + j];
+
+            double a = 0;
+            if(i == j){
+              a = sum;
+            }else{
+              a = responsabilities[l][j * length + j] + sum;
+              if(a > 0){
+                a = 0;
+              }
             }
+
+            availabilities[l][i * length + j] = lambda * availabilities[l][i * length + j] + (1 - lambda) * a;
           }
+        } // availability
 
-          double a = 0;
-          if(i == j){
-            a = preferences[l][j] + phi[l][j] + sum;
-          }else{
-            a = preferences[l][j] + phi[l][j] + responsabilities[0][j * length + j] + sum;
-            if(a > 0){
-              a = 0;
+      } else {
+        for(unsigned int i = 0; i < length; i++){
+          for(unsigned int j = 0; j < length; j++){
+            double sum = 0.;
+
+            for(unsigned int k = 0; k < length; k++){
+              if(k == i || k == j){
+                continue;
+              }
+              if(responsabilities[0][k * length + j] > 0.){
+                sum = sum + responsabilities[0][k * length + j];
+              }
             }
-          }
 
-          availabilities[0][i * length + j] = lambda * availabilities[0][i * length + j] + (1 - lambda) * a;
-        }
-      } // availability
+            double a = 0;
+            if(i == j){
+              a = preferences[l][j] + phi[l][j] + sum;
+            }else{
+              a = preferences[l][j] + phi[l][j] + responsabilities[0][j * length + j] + sum;
+              if(a > 0){
+                a = 0;
+              }
+            }
+
+            availabilities[0][i * length + j] = lambda * availabilities[0][i * length + j] + (1 - lambda) * a;
+          }
+        } // availability
+      }
     }
     // TODO Should break out of loop if converged sooner.
   }
 
   // Compute the exemplars
-  for(unsigned int i = 0; i < length; i++){
-    double max = availabilities[0][i * length + 0] + responsabilities[0][i * length + 0];
-    exemplar[i] = 0;
-    for(unsigned int j = 0; j < length; j++){
-      if(availabilities[0][i * length + j] + responsabilities[0][i * length + j] > max){
-        max = availabilities[0][i * length + j] + responsabilities[0][i * length + j];
-        exemplar[i] = j;
+  for(unsigned int l = 0; l < n_layers; l++){
+    for(unsigned int i = 0; i < length; i++){
+      double max = availabilities[l][i * length + 0] + responsabilities[l][i * length + 0];
+      exemplar[i + l * length] = 0;
+      for(unsigned int j = 0; j < length; j++){
+        if(availabilities[l][i * length + j] + responsabilities[l][i * length + j] > max){
+          max = availabilities[l][i * length + j] + responsabilities[l][i * length + j];
+          exemplar[i + l * length] = j;
+        }
       }
     }
   }
