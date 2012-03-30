@@ -145,7 +145,6 @@ void hierarchical_affinity_propagation(vector<double> similarity,
 
   sort(similarity_co.begin(), similarity_co.begin() + length * length);
   double preference = similarity_co[length * length / 2];
-  cout << "here" << endl;
 
   // Create 8 layers of length preference
   vector<vector<double> > preferences;
@@ -174,7 +173,6 @@ void hierarchical_affinity_propagation(vector<double> similarity,
     availabilities.push_back(availability);
     responsabilities.push_back(responsability);
   }
-  cout << "here" << endl;
 
   for(unsigned int it = 0; it < max_iter; it++){
 

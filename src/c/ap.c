@@ -9,7 +9,9 @@ using namespace std;
 
 struct options{
   char file_name[FILENAME_MAX];
+  char output_file[FILENAME_MAX];
   int lambda;
+  int n_layers;
 };
 
 void print_usage();
@@ -17,7 +19,8 @@ void print_usage();
 struct options get_default_options() {
   struct options opts;
   opts.lambda = 0.9;
-
+  opts.n_layers = 4;
+  strcpy(opts.output_file, "output.csv");
   return opts;
 }
 
@@ -36,6 +39,12 @@ bool get_args(struct options *opts, int argc, char ** argv){
       case 'l':
         opts->lambda = atol(argv[i] + 2);
         break;
+      case 'n':
+        opts->n_layers = atol(argv[i] + 2);
+        break;
+      case 'o':
+        strcpy(opts->output_file, argv[i] + 2);
+        break;
       default:
           printf("%s is not recognized as an argument\n", argv[i]);
           print_usage();
@@ -47,6 +56,8 @@ bool get_args(struct options *opts, int argc, char ** argv){
 
 void print_usage() {
   printf("Usage: ac -l<lambda> \n"
+         "          -n<number of layers>\n"
+         "          -o<output file> --default: output.csv\n"
          "          -h prints this help\n"
          "          file_name\n");
 }
@@ -59,10 +70,10 @@ int main(int argc, char ** argv){
 
   vector<double> matrix = reader.parse_lines(" ");
 
-  unsigned int results [reader.num_line * 8];
+  unsigned int results [reader.num_line * opts.n_layers];
   cout << "Affinity Propagation" << endl << flush;
   hierarchical_affinity_propagation(matrix, reader.num_line,
-            8, results, 0.5, 200);
-  CSVWriter writer("output.csv");
-  writer.write(results, reader.num_line, 8);
+            opts.n_layers, results, opts.lambda, 200);
+  CSVWriter writer(opts.output_file);
+  writer.write(results, reader.num_line, opts.n_layers);
 }
