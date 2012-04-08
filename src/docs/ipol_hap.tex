@@ -1,8 +1,5 @@
 %-------------------------------------------------------------------------------
-% LSD: a Line Segment Detector
-% by Rafael Grompone von Gioi, Jeremie Jakubowicz,
-%    Jean-Michel Morel & Gregory Randall
-% IPOL 2012
+% HAP
 %-------------------------------------------------------------------------------
 \documentclass{ipol}
 \ipolSetTitle{HAP: Hierarchical Affinity Propagation}
@@ -15,10 +12,20 @@
 \usepackage{hyperref,verbatim,graphicx,amsmath,amssymb,amssymb,dsfont}
 \usepackage[ruled,linesnumbered]{algorithm2e}
 \newtheorem{theorem}{Theorem}
+
+\bibliographystyle{acm}
+
 \begin{document}
 
 %-------------------------------------------------------------------------------
 \begin{abstract}
+
+Clustering data by finding representative points is an important task of data
+analysis. \cite{frey07affinitypropagation} introduces a novel algorithm based
+on passing messages to find such points, called "exemplars". \cite{hap}
+extended this algorithm to find hierarchical layers of exemplars. We present
+this method, called Hierarchical Affinity Propagation (HAP).
+
 \end{abstract}
 
 %-------------------------------------------------------------------------------
@@ -32,9 +39,40 @@
 %-------------------------------------------------------------------------------
 \section{Introduction}
 %-------------------------------------------------------------------------------
-\begin{thebibliography}{9}
 
-\end{thebibliography}
+Finding exemplars is a critical step in pattern recognition. 
+
+Standard clustering methods include randomly choosing a number of points from
+the dataset, and iteratively refining clusters. When cluster centers are
+chosen among datapoints, they are called "exemplars". Such methods, sensitive to the
+initialisation, often fall in local minimums, and have to be rerunned several
+times.
+
+Affinity propagation takes a noval approach, and considers all datapoints as
+potential exemplars.
+
+\subsection{Preliminaries}
+
+- preferences
+- similarities
+
+- responsabilities
+- availabilities
+- exemplars
+
+\section{Affinity Propagation}
+
+\begin{algorithm}[H]
+     \SetLine
+
+     initialization\;
+     \caption{Affinity Propagation}
+\end{algorithm}
+
+
+\section{Hierarchical Affinity Propagation}
+
+\bibliography{ipol_hap}
 
 \end{document}
 %-------------------------------------------------------------------------------
