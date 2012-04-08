@@ -40,7 +40,7 @@ this method, called Hierarchical Affinity Propagation (HAP).
 \section{Introduction}
 %-------------------------------------------------------------------------------
 
-Finding exemplars is a critical step in pattern recognition. 
+Finding exemplars is a critical step in pattern recognition.
 
 Standard clustering methods include randomly choosing a number of points from
 the dataset, and iteratively refining clusters. When cluster centers are
@@ -48,17 +48,44 @@ chosen among datapoints, they are called "exemplars". Such methods, sensitive to
 initialisation, often fall in local minimums, and have to be rerunned several
 times.
 
-Affinity propagation takes a noval approach, and considers all datapoints as
-potential exemplars.
+Affinity propagation (AP) takes a noval approach, and considers all datapoints
+as potential exemplars. By passing messages reflecting the affinity between
+datapoints, clusters emerge gradually during the procedure.
 
 \subsection{Preliminaries}
 
-- preferences
-- similarities
+Affinity propagation takes in input two elements: similarities and
+preferences. The similarity $s_{ij}$ defines how well $k$ is suited to be
+$i$'s exemplar, ie how $i$ and $j$ are similar, and the preference $p_i$ sets
+how well $j$ is likely to be chosen as exemplar. Affinity propagation does not
+require similarities to be metric, nor symmetric; $s_{ij}$ can be set to the
+negative euclidean distance between two points.
 
-- responsabilities
-- availabilities
-- exemplars
+Two notions are derived from the similarities and preferences:
+responsabilities and availabilities. These two messages are computed
+iteratively until convergence.
+
+The responsability $r_{ik}$ of data point $i$ to candidate exemplar $j$ corresponds to
+how well $k$ is suited to be an exemplar for $i$, compared to all the other
+exemplar candidates. \\
+\begin{equation*}
+r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik})
+\end{equation*}
+
+The availability $a_{ik}$ of candidate exemplar $k$ to point $i$ shows how
+appropriate $i$ to choose point $k$ as an exemplar taking in account all the
+other points $j$ that would take $k$ as an exemplar. The self-availability
+$a_{kk}$ reflects the probability that point $k$ is an exemplar based on the
+positive responsability send from all points to $k$.
+
+\begin{equation*}
+a_{ij} = \begin{cases}
+	    p_j + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
+	    \min ( 0, p_j + r_{jj} + \sum_{k \notin \{i, j\} } ) \max (0, r_{ij})
+	    & i \neq j\\
+	 \end{cases}
+\end{equation*}
+
 
 \section{Affinity Propagation}
 
