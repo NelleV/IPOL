@@ -68,7 +68,7 @@ int main(int argc, char ** argv){
   cout << "Reading input file" << endl << flush;
   CSVReader reader(opts.file_name);
 
-  vector<double> matrix = reader.parse_lines(" ");
+  vector<double> matrix = reader.read();
 
   unsigned int results [reader.num_line * opts.n_layers];
   cout << "Affinity Propagation" << endl << flush;

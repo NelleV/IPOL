@@ -1,36 +1,37 @@
-#include "csv.h"
-#include <fstream>
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
+#include "csv.h"
 
 using namespace std;
 
-CSVReader::CSVReader(const char * file_name){
-  this->file.open(file_name);
-  this->index = 0;
-  this->num_line = 0;
-};
-
-bool CSVReader::load_file(){
-  this->file.seekg(0, ios::end);
-  int length = this->file.tellg();
-  this->file.read(this->line, length);
+CSVReader::CSVReader(string file)
+{
+    this->filename = file;
+    this->index = 0;
 }
 
-bool CSVReader::next(){
-  this->file.getline(this->line, MAX_LENGTH);
-  if(!this->file.eof()){
-    this->num_line++;
-    return true;
-  }else{
-    return false;
-  }
+vector<double> CSVReader::read(){
+    ifstream csvfile(this->filename.c_str());
+    string delimiters(" ");
+
+    if(csvfile.is_open()){
+        while(!csvfile.eof()){
+            this->line = "";
+            getline(csvfile, this->line);
+            parse_line(delimiters);
+        }
+        csvfile.close();
+    }
+    return this->matrix;
 }
 
 bool CSVReader::parse_line(const string& delimiters){
   string str(this->line);
+  this->index = 0;
+  this->num_line++;
   string::size_type last_pos = str.find_first_not_of(delimiters, 0);
   string::size_type pos = str.find_first_of(delimiters, last_pos);
   string substring = str;
@@ -44,14 +45,6 @@ bool CSVReader::parse_line(const string& delimiters){
   }
   return true;
 }
-
-vector<double> CSVReader::parse_lines(const string& delimiters){
-  while(this->next()){
-    this->parse_line(delimiters);
-  }
-  return this->matrix;
-}
-
 
 CSVWriter::CSVWriter(const char * file_name){
   this->file.open(file_name);

@@ -129,10 +129,15 @@ void affinity_propagation(vector<double> similarity,
   }
 }
 
+/**
+ * Hierarchical Affinity Propagation
+ *
+ **/
 void hierarchical_affinity_propagation(vector<double> similarity,
     unsigned int length, unsigned int n_layers, unsigned int exemplar[],
     double lambda, int max_iter){
 
+  cout << "Affinity Propagation" << endl;
   // Compute preferences
   //
   // Need to copy the similarity array to sort it, in order to get the median
@@ -175,7 +180,7 @@ void hierarchical_affinity_propagation(vector<double> similarity,
   }
 
   for(unsigned int it = 0; it < max_iter; it++){
-
+    cout << "--- Iteration " << it << " ---" << endl;
     vector<vector<double> > tau;
     vector<vector<double> > phi;
     for(unsigned int l = 0; l < n_layers; l++){

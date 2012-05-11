@@ -1,3 +1,7 @@
+#
+# Hierarchical Affinity Propagation
+#
+
 all: affinity_propagation
 
 affinity_propagation:

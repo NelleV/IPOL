@@ -1,21 +1,23 @@
-#include <fstream>
 #include <string>
+#include <iostream>
+#include <fstream>
 #include <vector>
-#define MAX_LENGTH 999
 
-class CSVReader {
-public:
-    CSVReader(const char * file_name);
-    bool next();
-    bool parse_line(const std::string & delimiters);
-    std::vector<double> parse_lines(const std::string & delimiters);
-    unsigned int num_line;
-private:
-    bool load_file();
-    std::ifstream file;
-    char line[MAX_LENGTH];
-    std::vector<double> matrix;
-    unsigned long index;
+class CSVReader{
+    public:
+        CSVReader(std::string file);
+
+        int num_line;
+
+        std::vector<double> read();
+        bool parse_line(const std::string& delimiters);
+
+    private:
+        std::string filename;
+        std::string line;
+        std::vector<double> matrix;
+        int index;
+
 };
 
 class CSVWriter {
