@@ -1,6 +1,7 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <stdio.h>
 using namespace std;
 
 #include "affinity_propagation.h"
@@ -51,6 +52,7 @@ bool get_args(struct options *opts, int argc, char ** argv){
           exit(0);
     }
   }
+  i++;
   strcpy(opts->file_name, argv[i]);
 }
 
@@ -71,7 +73,6 @@ int main(int argc, char ** argv){
   vector<double> matrix = reader.read();
 
   unsigned int results [reader.num_line * opts.n_layers];
-  cout << "Affinity Propagation" << endl << flush;
   hierarchical_affinity_propagation(matrix, reader.num_line,
             opts.n_layers, results, opts.lambda, 200);
   CSVWriter writer(opts.output_file);

@@ -11,10 +11,12 @@ CSVReader::CSVReader(string file)
 {
     this->filename = file;
     this->index = 0;
+    this->num_line = 0;
 }
 
 vector<double> CSVReader::read(){
-    ifstream csvfile(this->filename.c_str());
+    ifstream csvfile;
+    csvfile.open(this->filename.c_str(), ifstream::in);
     string delimiters(" ");
 
     if(csvfile.is_open()){
@@ -24,6 +26,9 @@ vector<double> CSVReader::read(){
             parse_line(delimiters);
         }
         csvfile.close();
+    }else{
+      cout << "problem reading file" << endl << flush;
+      exit(0);
     }
     return this->matrix;
 }
