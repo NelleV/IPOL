@@ -52,8 +52,7 @@ bool get_args(struct options *opts, int argc, char ** argv){
           exit(0);
     }
   }
-  i++;
-  strcpy(opts->file_name, argv[i]);
+  strcpy(opts->file_name, argv[argc - 1]);
 }
 
 void print_usage() {
