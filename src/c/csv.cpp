@@ -10,7 +10,6 @@ using namespace std;
 CSVReader::CSVReader(string file)
 {
     this->filename = file;
-    this->index = 0;
     this->num_line = 0;
 }
 
@@ -30,12 +29,12 @@ vector<double> CSVReader::read(){
       cout << "problem reading file" << endl << flush;
       exit(0);
     }
+    this->num_line--;
     return this->matrix;
 }
 
 bool CSVReader::parse_line(const string& delimiters){
   string str(this->line);
-  this->index = 0;
   this->num_line++;
   string::size_type last_pos = str.find_first_not_of(delimiters, 0);
   string::size_type pos = str.find_first_of(delimiters, last_pos);
@@ -46,7 +45,6 @@ bool CSVReader::parse_line(const string& delimiters){
     this->matrix.push_back(atof(substring.c_str()));
     last_pos = str.find_first_not_of(delimiters, pos);
     pos = str.find_first_of(delimiters, last_pos);
-    this->index++;
   }
   return true;
 }
