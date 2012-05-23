@@ -265,7 +265,6 @@ void hierarchical_affinity_propagation(vector<double> similarity,
   for(unsigned int l = 0; l < n_layers; l++){
     for(unsigned int i = 0; i < length; i++){
       double max = availabilities[l][i * length + 0] + responsabilities[l][i * length + 0];
-    cout << "layer " << l << " max: " << max << endl << flush;
       exemplar[i + l * length] = 0;
       for(unsigned int j = 0; j < length; j++){
         cout << j << " " << availabilities[l][i * length + j] + responsabilities[l][i * length + j] << endl << flush;
