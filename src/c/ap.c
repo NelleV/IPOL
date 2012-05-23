@@ -19,7 +19,7 @@ void print_usage();
 
 struct options get_default_options() {
   struct options opts;
-  opts.lambda = 0.9;
+  opts.lambda = 0.5;
   opts.n_layers = 4;
   strcpy(opts.output_file, "output.csv");
   return opts;
@@ -74,6 +74,7 @@ int main(int argc, char ** argv){
   unsigned int results [reader.num_line * opts.n_layers];
   hierarchical_affinity_propagation(matrix, reader.num_line,
             opts.n_layers, results, opts.lambda, 200);
+
   CSVWriter writer(opts.output_file);
   writer.write(results, reader.num_line, opts.n_layers);
 }
