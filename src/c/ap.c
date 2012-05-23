@@ -11,7 +11,7 @@ using namespace std;
 struct options{
   char file_name[FILENAME_MAX];
   char output_file[FILENAME_MAX];
-  int lambda;
+  double lambda;
   int n_layers;
 };
 
@@ -38,7 +38,7 @@ bool get_args(struct options *opts, int argc, char ** argv){
         exit(0);
         break;
       case 'l':
-        opts->lambda = atol(argv[i] + 2);
+        opts->lambda = atof(argv[i] + 2);
         break;
       case 'n':
         opts->n_layers = atol(argv[i] + 2);

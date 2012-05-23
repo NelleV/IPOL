@@ -17,7 +17,7 @@ void hierarchical_affinity_propagation(vector<double> similarity,
     double lambda, int max_iter){
 
   cout << "Affinity Propagation" << endl;
-  cout << length << endl;
+
   // Compute preferences
   //
   // Need to copy the similarity array to sort it, in order to get the median
