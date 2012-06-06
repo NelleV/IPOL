@@ -49,7 +49,7 @@ cluster centers are chosen among datapoints, they are called "exemplars". \\
 Clustering can be done by randomly choosing a number of points from
 the dataset, and iteratively refining clusters. Such methods, sensitive to the
 initialization, often fall in local minima, and have to be reran several
-times. \\
+times.\\
 Affinity propagation (AP) takes a novel approach, and considers all datapoints
 as potential exemplars. By passing messages reflecting the affinity between
 datapoints, clusters emerge gradually from the dataset. \\
@@ -58,16 +58,17 @@ datapoints, clusters emerge gradually from the dataset. \\
 Let $N$ be the number of datapoints.
 
 Affinity propagation takes in input two elements: \textbf{similarities} and
-\textbf{preferences}. The similarity $s_{ij}$ defines how well $j$ is suited to be
-$i$'s exemplar, ie how much $i$ and $j$ are similar. Affinity propagation
-does not require similarities to be metric, nor symmetric; $s_{ij}$ can be set
-to the negative euclidean distance between two points. \\
+\textbf{preferences}. The similarity $s_{ij}$ defines how well $j$ is suited
+to be $i$'s exemplar, ie how much $i$ and $j$ are similar. Affinity
+propagation does not require similarities to be symmetric. Intuitively,
+similarities $s_{ij}$ can be set to the negative euclidean distance between
+two points. \\
 % XXX check whether a large preference yield a large number of exemplars
-The preference $p_i$ sets how well $j$ is likely to be chosen as exemplar.
+The preference $p_i$ sets how well $i$ is likely to be chosen as exemplar.
 Low preferences will yield smaller numbers of exemplars, while high
 preferences will yield a large number of exemplars. It can be set as the median
 for an average number of clusters, or to the minimum of the similarities, for
-a small number of cluster. \\
+a small number of clusters. \\
 Let $e_j$ be a set of hidden variable, where $e_j = 1$ indicates that point
 $j$ has been chosen as an exemplar. Let $h_{ij}$ be a set of hidden variable
 that chose that point $i$ has chosen point $j$ as it's exemplar. We can now
@@ -75,30 +76,35 @@ set some constraints:
 \begin{itemize}
 \item One point can choose only one exemplar:
 \begin{equation*}
-\forall j \sum_{j} h_{ij} = 1
+\forall j, \sum_{j} h_{ij} = 1
 \end{equation*}
 \item If a point is an exemplar, than it is necessarily it's own exemplar
 \begin{equation*}
-e_{j} = 1 \Rightarrow h_{jj} = 1
+\forall j, e_{j} = 1 \Rightarrow h_{jj} = 1
 \end{equation*}
 \end{itemize}
 
 We can express the optimization problem as:
 \begin{equation*}
-\max \sum_{i, j} s_{ij} h_{ij} + \sum_{j} p_j e_j
+\renewcommand{\arraystretch}{2}
+\begin{array}{ccl}
+\text{maximise} & & \sum_{i, j} s_{ij} h_{ij} + \sum_{j} p_j e_j \\
+\text{subject to} &  & \sum_{j} h_{ij} = 1 \\
+		  &  & e_{j} = h_{jj}
+\end{array}
 \end{equation*}
-The optimization objective can be seen as a trading off between pairwise
-similarities and preferences. This problem is NP hard. Hence, we will use an
-iterative and approximate algorithm inspired from the max sum algorithm to
-find exemplars. \\
+
+
+The second term of the objective function is a penalty term on the number of clusters, preventing the
+trivial solution of each point picking itself as exemplars. The higher the
+preference is, the more important the penalty on a point will be, the lower
+the probability of choosing this point as an examplar will be. This problem is
+NP hard. Hence, we will use an iterative and approximate algorithm inspired
+from the max sum algorithm to find exemplars. \\
+
 Two notions are derived from the similarities and preferences:
 \textbf{responsibilities} and \textbf{availabilities}. These two types of
 messages are computed iteratively until convergence.
-$(a_{ij} + s_{ij})$ defines the certainty of $i$ choosing $j$ as exemplar.
-Hence:
-\begin{equation*}
-e_i = \argmax_j a_{ij} + s_{ij}
-\end{equation*}
 \\
 The responsibility $r_{ik}$ of data point $i$ to
 candidate exemplar $j$ corresponds to how well $k$ is suited to be an exemplar
@@ -118,20 +124,31 @@ exemplar based on the positive responsibility send from all points to $k$.
 \begin{equation*}
 a_{ij} = \begin{cases}
 	    p_j + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
-	    \min ( 0, p_j + r_{jj} + \sum_{k \notin \{i, j\} } ) \max (0, r_{ij})
+	    \min ( 0, p_j + r_{jj} + \sum_{k \notin \{i, j\} } \max (0, r_{ij}))
 	    & i \neq j\\
 	 \end{cases}
 \end{equation*}
 
+$(a_{ij} + s_{ij})$ defines the certainty of $i$ choosing $j$ as exemplar.
+Hence:
+\begin{equation*}
+e_i = \arg \max_j a_{ij} + s_{ij}
+\end{equation*}
 
 \begin{algorithm}[H]
   \SetLine
   initialization\;
   \For{iteration}{
-    Compute availabilities\;
-    Compute responsibilities \;
+    Compute availabilities $a_{ij} = \begin{cases}
+	    p_j + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
+	    \min ( 0, p_j + r_{jj} + \sum_{k \notin \{i, j\} } \max (0, r_{ij}))
+	    & i \neq j\\
+	 \end{cases}$
+\;
+    Compute responsibilities $r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik})
+$\;
   }
-  Compute exemplars $e_i = \argmax_{j} a_{ij} + s_{ij}$ \;
+  Compute exemplars $e_i = \arg \max_{j} a_{ij} + s_{ij}$ \;
   \caption{Affinity Propagation}
 \end{algorithm}
 
@@ -168,7 +185,7 @@ To solve this optimization problem, two messages are passed up and down the
 layers, in addition to the responsibilities and availabilities.
 
 \begin{equation}
-\tau_j^{l + 1} = p^l_j + r_{jj}^l + \sum_{k \neq j}
+\tau_j^{l + 1} = p^l_j + r_{jj}^l + \sum_{k \neq j} \max (0, \rho^l_{jk})
 \end{equation}
 
 \begin{equation}
@@ -188,6 +205,28 @@ a_{ij}^{l < L} = \begin{cases}
 r_{ij}^{l > 1} = s_{ij}  + \min [ \tau_i^l, - \max_{k \neq j} (a_{ik} + s_{ik}) ]
 \end{equation*}
 
+\begin{algorithm}[H]
+  \SetLine
+  initialization\;
+  \For{iteration}{
+    Compute $\tau_j^{l + 1} = p^l_j + r_{jj}^l + \sum_{k \neq j} \max (0, \rho^l_{jk}) $\;
+    Compute $\phi_j^{l - 1} = \max_k (a_{jk}^l + s_{jk}^l)$\;
+    \For{all layers}{
+      Compute availabilities 
+	$a_{ij}^{l < L} = \begin{cases}
+	    p_j + \phi_j^l + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
+	    \min ( 0, p_j + \phi_j^l + r_{jj} + \sum_{k \notin \{i, j\} } ) \max (0, r_{ij}) & i \neq j\\
+	\end{cases}$  \;
+       Compute responsibilities 
+	$r_{ij}^{l > 1} = s_{ij}  + \min [ \tau_i^l, - \max_{k \neq j} (a_{ik} + s_{ik}) ]$\;
+
+      }
+  }
+  Compute exemplars $e_i = \arg \max_{j} a_{ij} + s_{ij}$ \;
+  \caption{Hierarchical Affinity Propagation}
+\end{algorithm}
+
+\section{Results}
 
 \bibliography{ipol_hap}
 
