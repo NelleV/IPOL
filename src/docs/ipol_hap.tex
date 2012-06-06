@@ -42,29 +42,47 @@ this method, called Hierarchical Affinity Propagation (HAP).
 \section{Introduction}
 %-------------------------------------------------------------------------------
 
-% XXX rephrase
 Findings a small number of points that represents well a dataset is a critical
-step in pattern recognition. Exemplar-based clustering performs not only a
-clustering step, ie partitionning a set of datapoints that are similar in some
-sense, but also identifies for each cluster a point which represents the most
-that clusters. Those points are called "exemplars". \\
-Clustering can be done by randomly choosing a number of points from
-the dataset, and iteratively refining clusters. Such methods, sensitive to the
-initialization, often fall in local minima, and have to be reran several
-times.\\
-Affinity propagation (AP) takes a novel approach, and considers all datapoints
-as potential exemplars. By passing messages reflecting the affinity between
-datapoints, clusters emerge gradually from the dataset. \\
+step in pattern recognition. Exemplar-based clustering (EBC) not only performs
+clustering, ie partitions a set of datapoints into subsets that are similar in
+some sense, but also identifies for each cluster a point which represents the
+most that cluster. Those points are called exemplars.\\
+
+Traditional clustering technics such as $k$-means start by randomly choosing a
+number of points from the dataset as cluster centers, and iteratively refine
+clusters by assigning labels to points, and reevalutating cluster centers.
+Such methods, sensitive to the initialization, often fall in local minima, and
+have to be reran several times. Affinity propagation (AP) takes a novel
+approach, and considers all datapoints as potential exemplars. By passing
+messages reflecting the affinity between datapoints, clusters and exemplars
+emerge gradually from the dataset. \\
+
+The AP was first extended to find a hierarchical structure in the data by
+\cite{Xiao07jointaffinity}. The hierarchical structure of the data implies
+that at layer $l$, only exemplars from layer $l - 1$ may be chosen as
+exemplars. The greedy algorithm was found to suffer from making decisions in
+the lower levels that affected higher levels in a suboptimal way. \cite{hap}
+then proposed a new exemplar-based clustering algorithm by reformulating the
+objective function of AP. This algorithm is called Hierarchical Affinity
+Propagation (HAP), and has been shown to be more effective than the greedy
+version. \\
+
+We will first review the standard AP model, before analysing the HAP. We will
+then show examples of the HAP, underlying the strength and weaknesses of the
+algorithm.
 
 \section{Affinity Propagation}
-Let $N$ be the number of datapoints.
 
-Affinity propagation takes in input two elements: \textbf{similarities} and
-\textbf{preferences}. The similarity $s_{ij}$ defines how well $j$ is suited
-to be $i$'s exemplar, ie how much $i$ and $j$ are similar. Affinity
-propagation does not require similarities to be symmetric. Intuitively,
-similarities $s_{ij}$ can be set to the negative euclidean distance between
-two points. \\
+Let $N$ be the number of datapoints. Affinity propagation takes in input two
+elements: a squared matrix $N \times N$ representing \textbf{similarities}
+$(s_{ij})_{1 \leq i, j \leq N}$ and
+a vector of size $N$ representing self-similarities or \textbf{preferences}
+$(p_i)_{1 \leq i \leq N}$. \\
+
+The similarity $s_{ij}$ defines how well $j$ is suited to be $i$'s exemplar,
+ie how much $i$ and $j$ are similar. Affinity propagation does not require
+similarities to be symmetric. Intuitively, similarities $s_{ij}$ can be set to
+the negative euclidean distance between two points. \\
 
 The preference $p_i$ sets how well $i$ is likely to be chosen as exemplar. Low
 preferences will yield a smaller number of exemplars, while high preferences
@@ -74,8 +92,8 @@ to favor a priori one point other another. Hence, preferences can be set as
 the median for an average number of clusters, or to the minimum of the
 similarities, for a small number of clusters. \\
 
-Let $e_j$ be a set of hidden variable, where $e_j = 1$ indicates that point
-$j$ has been chosen as an exemplar. Let $h_{ij}$ be a set of hidden variable
+Let $(e_j)_{1 \leq j \leq N}$ be a set of hidden variable, where $e_j = 1$ indicates that point
+$j$ has been chosen as an exemplar. Let $(h_{ij})_{1 < \leq i, j < N}$ be a set of hidden variable
 that chose that point $i$ has chosen point $j$ as it's exemplar. We can now
 set some constraints:
 \begin{itemize}
@@ -109,8 +127,8 @@ from the max sum algorithm to find exemplars. \\
 
 Two notions are derived from the similarities and preferences:
 \textbf{responsibilities} and \textbf{availabilities}. These two types of
-messages are computed iteratively until convergence.
-\\
+messages are computed iteratively until convergence.\\
+
 The responsibility $r_{ik}$ of data point $i$ to
 candidate exemplar $j$ corresponds to how well $k$ is suited to be an exemplar
 for $i$, compared to all the other exemplar candidates. The higher the
@@ -120,6 +138,7 @@ responsibility be.
 r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik})
 \end{equation*}
 \\
+
 The availability $a_{ik}$ of candidate exemplar $k$ to point $i$ shows how
 appropriate it is for $i$ to choose point $k$ as an exemplar; it takes in account
 all the other points $j$ that would take $k$ as an exemplar. The
@@ -171,6 +190,7 @@ exemplar. Similarly, this can be expressed as the following ; if point $i$ isn't
 exemplar at layer $l - 1$, ie, $e_{i}^{l - 1} = 0$, it then won't be clustered at
 level $j$ ; if a point $i$ is an exemplar at level $l -1$ then it must choose
 an exemplar at level $l$.\\
+
 We can express the constraints as follow:
 
 \begin{equation}
@@ -181,8 +201,8 @@ We can express the constraints as follow:
 e_j^l = h_{jj}^l = \max_i h_{ij}^l
 \end{equation}
 
-One could also imagine setting preferences and similarities specifically to a
-layer. Therefore, the objective function to optimize is:
+One could also imagine layer specific similarities $(s^l_{ij})$ and examplars
+$(p^l_j)$. Therefore, the objective function to optimize is:
 
 \begin{equation*}
 \renewcommand{\arraystretch}{2}
@@ -219,13 +239,13 @@ r_{ij}^{l > 1} = s_{ij}  + \min [ \tau_i^l, - \max_{k \neq j} (a_{ik} + s_{ik}) 
 \end{equation*}
 
 The responsabilities for layer $l = 1$ and the availabilities for layer $l =
-L$ are identical to the standard AP messages.
+L$ are identical to the standard AP messages. \\
 
 \cite{hap} shows that HAP outperforms both greedy message parsing algorithm,
 and algorithm based on $k$-means with random restarts. Unfortunately, in a
-small number of cases, HAP fails to converge. \cite{hap} suggests to ran both
+small number of cases, HAP fails to converge. \cite{hap} suggests to run both
 a greedy algorithm and the HAP, and to pick the results for which the
-objective functione is the lowest.
+objective function is the lowest.
 
 \begin{algorithm}[h]
   \SetLine
@@ -249,7 +269,6 @@ objective functione is the lowest.
 \end{algorithm}
 
 \section{Results}
-
 
 \bibliography{ipol_hap}
 
