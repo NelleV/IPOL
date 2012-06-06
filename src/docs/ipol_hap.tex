@@ -3,7 +3,7 @@
 %-------------------------------------------------------------------------------
 \documentclass{ipol}
 \ipolSetTitle{HAP: Hierarchical Affinity Propagation}
-\ipolSetAuthors{Nelle Varoquaux}
+\ipolSetAuthors{Nelle Varoquaux, Raphael Grompone Von Gioi}
 \ipolSetYear{2012}
 \ipolSetMonth{3}
 \ipolSetDay{1}
@@ -44,8 +44,10 @@ this method, called Hierarchical Affinity Propagation (HAP).
 
 % XXX rephrase
 Findings a small number of points that represents well a dataset is a critical
-step in pattern recognition. Such task falls into clustering techniques. When
-cluster centers are chosen among datapoints, they are called "exemplars". \\
+step in pattern recognition. Exemplar-based clustering performs not only a
+clustering step, ie partitionning a set of datapoints that are similar in some
+sense, but also identifies for each cluster a point which represents the most
+that clusters. Those points are called "exemplars". \\
 Clustering can be done by randomly choosing a number of points from
 the dataset, and iteratively refining clusters. Such methods, sensitive to the
 initialization, often fall in local minima, and have to be reran several
@@ -63,12 +65,15 @@ to be $i$'s exemplar, ie how much $i$ and $j$ are similar. Affinity
 propagation does not require similarities to be symmetric. Intuitively,
 similarities $s_{ij}$ can be set to the negative euclidean distance between
 two points. \\
-% XXX check whether a large preference yield a large number of exemplars
-The preference $p_i$ sets how well $i$ is likely to be chosen as exemplar.
-Low preferences will yield smaller numbers of exemplars, while high
-preferences will yield a large number of exemplars. It can be set as the median
-for an average number of clusters, or to the minimum of the similarities, for
-a small number of clusters. \\
+
+The preference $p_i$ sets how well $i$ is likely to be chosen as exemplar. Low
+preferences will yield a smaller number of exemplars, while high preferences
+will yield a large number of exemplars. Thought in some application, setting
+different preferences to point may be justified, there is often little reason
+to favor a priori one point other another. Hence, preferences can be set as
+the median for an average number of clusters, or to the minimum of the
+similarities, for a small number of clusters. \\
+
 Let $e_j$ be a set of hidden variable, where $e_j = 1$ indicates that point
 $j$ has been chosen as an exemplar. Let $h_{ij}$ be a set of hidden variable
 that chose that point $i$ has chosen point $j$ as it's exemplar. We can now
@@ -76,21 +81,21 @@ set some constraints:
 \begin{itemize}
 \item One point can choose only one exemplar:
 \begin{equation*}
-\forall j, \sum_{j} h_{ij} = 1
+\sum_{j} h_{ij} = 1
 \end{equation*}
 \item If a point is an exemplar, than it is necessarily it's own exemplar
 \begin{equation*}
-\forall j, e_{j} = 1 \Rightarrow h_{jj} = 1
+e_{j} = 1 \Rightarrow h_{jj} = 1
 \end{equation*}
 \end{itemize}
 
 We can express the optimization problem as:
 \begin{equation*}
 \renewcommand{\arraystretch}{2}
-\begin{array}{ccl}
-\text{maximise} & & \sum_{i, j} s_{ij} h_{ij} + \sum_{j} p_j e_j \\
-\text{subject to} &  & \sum_{j} h_{ij} = 1 \\
-		  &  & e_{j} = h_{jj}
+\begin{array}{ccll}
+\text{maximise} & & \sum_{i, j} s_{ij} h_{ij} + \sum_{j} p_j e_j & \\
+\text{subject to} &  & \sum_{j} h_{ij} = 1, & i = 1, \dots, n \\
+		  &  & e_{j} = h_{jj}, & j = 1, \dots, n\\
 \end{array}
 \end{equation*}
 
@@ -135,7 +140,7 @@ Hence:
 e_i = \arg \max_j a_{ij} + s_{ij}
 \end{equation*}
 
-\begin{algorithm}[H]
+\begin{algorithm}[h]
   \SetLine
   initialization\;
   \For{iteration}{
@@ -143,10 +148,8 @@ e_i = \arg \max_j a_{ij} + s_{ij}
 	    p_j + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
 	    \min ( 0, p_j + r_{jj} + \sum_{k \notin \{i, j\} } \max (0, r_{ij}))
 	    & i \neq j\\
-	 \end{cases}$
-\;
-    Compute responsibilities $r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik})
-$\;
+	 \end{cases}$\;
+    Compute responsibilities $r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik})$\;
   }
   Compute exemplars $e_i = \arg \max_{j} a_{ij} + s_{ij}$ \;
   \caption{Affinity Propagation}
@@ -167,7 +170,7 @@ an exemplar at level $l$.\\
 We can express the constraints as follow:
 
 \begin{equation}
-\forall j, \forall l \in [0, L], \sum_{j} h_{ij}^l = e_i^{l-1}
+\sum_{j} h_{ij}^l = e_i^{l-1}
 \end{equation}
 
 \begin{equation}
@@ -177,9 +180,15 @@ e_j^l = h_{jj}^l = \max_i h_{ij}^l
 One could also imagine setting preferences and similarities specifically to a
 layer. Therefore, the objective function to optimize is:
 
-\begin{equation}
-\max \sum_{i, j, l} s^l_{ij} h^l_{ij} + \sum_{j} p^l_j e^l_j
-\end{equation}
+\begin{equation*}
+\renewcommand{\arraystretch}{2}
+\begin{array}{ccll}
+\text{maximise} & & \sum_{i, j, l} s^l_{ij} h^l_{ij} + \sum_{j} p^l_j e^l_j \\
+\text{subject to} &  & e^l_{j} = h^l_{jj}, & j = 1, \dots, n\\
+		  &  & \sum_{j} h_{ij}^l = e_i^{l-1}, & i = 1, \dots, n\\
+
+\end{array}
+\end{equation*}
 
 To solve this optimization problem, two messages are passed up and down the
 layers, in addition to the responsibilities and availabilities.
@@ -205,7 +214,16 @@ a_{ij}^{l < L} = \begin{cases}
 r_{ij}^{l > 1} = s_{ij}  + \min [ \tau_i^l, - \max_{k \neq j} (a_{ik} + s_{ik}) ]
 \end{equation*}
 
-\begin{algorithm}[H]
+The responsabilities for layer $l = 1$ and the availabilities for layer $l =
+L$ are identical to the standard AP messages.
+
+\cite{hap} shows that HAP outperforms both greedy message parsing algorithm,
+and algorithm based on $k$-means with random restarts. Unfortunately, in a
+small number of cases, HAP fails to converge. \cite{hap} suggests to ran both
+a greedy algorithm and the HAP, and to pick the results for which the
+objective functione is the lowest.
+
+\begin{algorithm}[h]
   \SetLine
   initialization\;
   \For{iteration}{
@@ -227,6 +245,7 @@ r_{ij}^{l > 1} = s_{ij}  + \min [ \tau_i^l, - \max_{k \neq j} (a_{ik} + s_{ik}) 
 \end{algorithm}
 
 \section{Results}
+
 
 \bibliography{ipol_hap}
 
