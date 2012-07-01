@@ -63,7 +63,6 @@ void hierarchical_affinity_propagation(vector<double> similarity,
 
   // Compute the hierarchical affinity propagation
   for(unsigned int it = 0; it < max_iter; it++){
-    cout << "--- Iteration " << it << " ---" << endl;
 
     // For the first iteration, lambda is equal to 0, ie we do not average
     // with the previous iteration; For the all the next iteration, we average
@@ -267,7 +266,6 @@ void hierarchical_affinity_propagation(vector<double> similarity,
       double max = availabilities[l][i * length + 0] + responsabilities[l][i * length + 0];
       exemplar[i + l * length] = 0;
       for(unsigned int j = 0; j < length; j++){
-        cout << j << " " << availabilities[l][i * length + j] + responsabilities[l][i * length + j] << endl << flush;
         if(availabilities[l][i * length + j] + responsabilities[l][i * length + j] >= max){
           max = availabilities[l][i * length + j] + responsabilities[l][i * length + j];
           exemplar[i + l * length] = j;
