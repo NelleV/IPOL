@@ -4,9 +4,10 @@
 
 EXE = affinity_propagation
 
-OBJS = affinity_propagation.o \
-       csv.o \
+OBJS = csv.o \
+       affinity_propagation.o \
        ap.o
+
 
 CXXFLAGS = -O3
 
@@ -37,8 +38,10 @@ $(EXE): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $$bla $(ADDLIBS) $(LIBS)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+.cpp.obj:
+	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ `$(CYGPATH_W) '$<'`
 
 clean:
 	rm -rf $(OBJS) $(EXE)
