@@ -182,14 +182,22 @@ identical over 10 iterations. We choose to do a fixed number of iterations.
 
 \begin{algorithm}[h]
   \SetLine
+  similarities $s_{ij}$, preferences $p_i$, damping factor $\lambda$ \;
+
   initialization\;
   \For{iteration}{
     Compute availabilities $a_{ij} = \begin{cases}
-	    p_j + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
-	    \min ( 0, p_j + r_{jj} + \sum_{k \notin \{i, j\} } \max (0, r_{ij}))
+	    p_j + \sum_{k \neq j} \max(0, r^{t - 1}_{kj}) &  i = j \\
+	    \min ( 0, p_j + r^{t - 1}_{jj} + \sum_{k \notin \{i, j\} } \max (0, r^{t
+	    - 1}_{ij}))
 	    & i \neq j\\
 	 \end{cases}$\;
-    Compute responsibilities $r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik})$\;
+    Compute responsibilities $r_{ij} = s_{ij} - \max_{k \neq j} (a^{t -1}_{ik} + s_{ik})$\;
+    Compute the messages with the damping factors:
+    $\begin{cases} a_{ij}^t = \lambda a_{ij} + (\lambda - 1) a^{t - 1}_{ij} \\
+		   r_{ij}^t = \lambda r_{ij} + (\lambda - 1) r^{t - 1}_{ij} \\
+     \end{cases}$ \;
+
   }
   Compute labels $\arg \max_{j} a_{ij} + s_{ij}$ \;
   \caption{Affinity Propagation}
