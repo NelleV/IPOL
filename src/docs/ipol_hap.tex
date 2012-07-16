@@ -81,13 +81,14 @@ algorithm.
 Let $N$ be the number of datapoints. Affinity propagation takes in input three
 elements: a squared matrix $N \times N$ representing \textbf{similarities}
 $(s_{ij})_{1 \leq i, j \leq N}$, a vector of size $N$ representing
-self-similarities or \textbf{preferences} $(p_i)_{1 \leq i \leq N}$ and a
-damping factor $\lambda$. \\
+\textbf{preferences} $(p_i)_{1 \leq i \leq N}$ and a damping factor $\lambda$.
+\\
 
 The similarity $s_{ij}$ defines how well point $j$ is suited to be point $i$'s
 exemplar, ie how much $i$ and $j$ are similar. Affinity propagation does not
 require similarities to be symmetric. Intuitively, similarities $s_{ij}$ can
-be set to the negative euclidean distance between two points. \\
+be set to the negative euclidean distance between two points. We assume that
+similarities are negative for the rest of the article.\\
 
 The preference $p_i$ sets how well $i$ is likely to be chosen as exemplar. Low
 preferences will yield a smaller number of exemplars, while high preferences
@@ -95,19 +96,54 @@ will yield a large number of exemplars. Thought in some application, setting
 different preferences to point may be justified, there is often little reason
 to favor a priori one point other another. Hence, preferences can be set as
 the median for an average number of clusters, or to the minimum of the
-similarities, for a small number of clusters. \\
+similarities, for a small number of clusters. We assume that preferences are
+negative for the rest of the article.\\
 
-Let $(e_j)_{1 \leq j \leq N}$ be a set of hidden variable, where $e_j = 1$
-indicates that point $j$ has been chosen as an exemplar. Let $(h_{ij})_{1 <
-\leq i, j < N}$ be a set of hidden variable that chose that point $i$ has
-chosen point $j$ as it's exemplar. We can now set some constraints:
+\begin{figure}
+\begin{center}
+\includegraphics[width=250px]{./images/initial_configuration-300dpi.png}
+\end{center}
+\caption{Clusters of points gradually emerged from the dataset.}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics[width=250px]{./images/clustered-200dpi.png}
+\end{center}
+\caption{Clusters of points gradually emerged from the dataset.}
+\end{figure}
+
+Let $(e_j)_{1 \leq j \leq N}$ and $(h_{ij})_{1 < \leq i, j < N}$ be sets of
+binary hidden variable describing the final state of the clustering algorithm.
+$e_j = 1$ indicates that point $j$ has been chosen as an exemplar. $h_{ij} =
+1$ shows that point $i$ has chosen point $j$ as its exemplar. 
+
+\begin{equation*}
+\begin{cases}
+  h_{ij} = 1 & \text{$i$ chose $j$ as its exemplar}\\
+  h_{ij} = 0 & \text{else} \\
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\begin{cases}
+e_j = 1 & \text{$j$ is an exemplar} \\
+e_j = 0 & \text{else} \\
+\end{cases}
+\end{equation*}
+
+We can now set some constraints:
 
 \begin{itemize}
 \item One point can choose only one exemplar:
-\begin{equation*}
-\sum_{j} h_{ij} = 1.
-\end{equation*}
-\item If a point is an exemplar, than it is necessarily it's own exemplar
+
+\begin{equation}
+\sum_j h_{ij} = 1
+\end{equation}
+
+\item If a point is an exemplar, then it cannot choose another point as an
+exemplar: there is only one exemplar per cluster, and the exemplar of a
+cluster is necessarily in that cluster. Hence, an exemplar is its own
+exemplar.
 \begin{equation*}
 e_{j} = 1 \Rightarrow h_{jj} = 1.
 \end{equation*}
@@ -123,33 +159,37 @@ We can express the optimization problem as:
 \end{array}
 \end{equation*}
 
+The first term of the objective function corresponds to the sum of the
+similarities between each points and its exemplar. The second term of the
+objective function is a negative penalty term on the number of clusters,
+preventing the trivial solution of each point picking itself as exemplars. \\
 
-The second term of the objective function is a penalty term on the number of clusters, preventing the
-trivial solution of each point picking itself as exemplars. The higher the
-preference is, the more important the penalty on a point will be, the lower
-the probability of choosing this point as an examplar will be. This problem is
-NP hard. Hence, we will use an iterative and approximate algorithm inspired
-from the max sum algorithm to find exemplars. \\
+This problem is NP hard. Hence, we will use an iterative and
+approximate algorithm inspired from the max sum algorithm to find exemplars.
+\\
 
 Two notions are derived from the similarities and preferences:
 \textbf{responsibilities} and \textbf{availabilities}. These two types of
 messages are computed iteratively until convergence.\\
 
-The responsibility $r_{ik}$ of data point $i$ to
+The responsibility $r_{ij}$ of data point $i$ to
 candidate exemplar $j$ corresponds to how well $k$ is suited to be an exemplar
 for $i$, compared to all the other exemplar candidates. The higher the
 similarity between points $i$ and points $j$, the higher should the
-responsibility be.
-\begin{equation*}
-r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik}).
-\end{equation*}
-\\
+responsibility be. \\
 
 The availability $a_{ik}$ of candidate exemplar $k$ to point $i$ shows how
 appropriate it is for $i$ to choose point $k$ as an exemplar; it takes in account
 all the other points $j$ that would take $k$ as an exemplar. The
 self-availability $a_{kk}$ reflects the probability that point $k$ is an
 exemplar based on the positive responsibility send from all points to $k$.
+
+
+\begin{equation*}
+r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik}).
+\end{equation*}
+\\
+
 
 \begin{equation*}
 a_{ij} = \begin{cases}
@@ -189,7 +229,7 @@ identical over 10 iterations. We choose to do a fixed number of iterations.
     Compute availabilities $a_{ij} = \begin{cases}
 	    p_j + \sum_{k \neq j} \max(0, r^{t - 1}_{kj}) &  i = j \\
 	    \min ( 0, p_j + r^{t - 1}_{jj} + \sum_{k \notin \{i, j\} } \max (0, r^{t
-	    - 1}_{ij}))
+	    - 1}_{kj}))
 	    & i \neq j\\
 	 \end{cases}$\;
     Compute responsibilities $r_{ij} = s_{ij} - \max_{k \neq j} (a^{t -1}_{ik} + s_{ik})$\;

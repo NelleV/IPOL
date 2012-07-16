@@ -1,3 +1,7 @@
 To run the code::
   ./affinity_propagation -ooutput.csv examples/ToyProblemSimilarities.csv
 
+
+To compile the code:
+
+ g++ -g -o affinity_propagation  ap.cpp affinity_propagation.cpp csv.cpp
