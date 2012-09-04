@@ -102,10 +102,11 @@ often little reason to favor \textit{a priori} one point over another. Hence,
 preferences can be set as the median for an average number of clusters, or to
 the minimum of the similarities, for a small number of clusters. \\
 
-Let $(e_j)_{1 \leq j \leq N}$ be a set of hidden variable, where $e_j = 1$
-indicates that point $j$ has been chosen as an exemplar. Let $(h_{ij})_{1 \leq
-i, j \leq N}$ be a set of hidden variable that shows that point $i$ has chosen
-point $j$ as its exemplar. We can now mathematically express some constraints:
+Let$(e_j)_{1 \leq j \leq N}$ and $(h_{ij})_{i \leq i, j \leq N}$ be sets of
+hidden variables representing the final state of clustering. $e_j = 1$
+indicates that point $j$ has been chosen as an exemplar and $h_{ij} = 1$
+indicates that $i$ has chosen point $j$ as its exemplar. We can now
+mathematically express some constraints on those final state variables:
 
 \begin{itemize}
 \item One point is part of only one cluster, ie, it can choose only one
@@ -135,10 +136,11 @@ The first term of the objective function tries to maximize similarities
 between the datapoints and their exemplars. The second term of the objective
 function is a penalty term on the number of clusters, preventing the trivial
 solution of each point picking itself as exemplars. The higher the preference
-is, the more important the penalty on a point will be, the lower the
-probability of choosing this point as an examplar will be. This problem is NP
-hard. Hence, we will use an iterative and approximate algorithm inspired from
-the max sum algorithm to find exemplars. \\
+is, the lower the penalty on a point will be, the higher probability of
+choosing this point as an examplar will be. \\
+
+This problem is NP hard. Hence, we will use an iterative and approximate
+algorithm inspired from the max sum algorithm to find exemplars. \\
 
 Two notions are derived from the similarities and preferences:
 \textbf{responsibilities} and \textbf{availabilities}. These two types of
@@ -171,7 +173,7 @@ a_{ij} = \begin{cases}
 	 \end{cases}
 \end{equation*}
 
-A damping factor $\lambda$, chosen between 0 and 1, is used to avoid
+A damping factor $\lambda$, chosen between 0.5 and 1, is used to avoid
 numerical oscillations. Each messages is updated with $\lambda$ times its
 value from the previous iteration, and $(1 - \lambda)$ its prescribed value.
 \\
@@ -297,7 +299,8 @@ objective function is the lowest.
       Compute availabilities 
 	$a_{ij}^{l < L} = \begin{cases}
 	    p_j + \phi_j^l + \sum_{k \neq j} \max(0, r_{kj}) &  i = j \\
-	    \min ( 0, p_j + \phi_j^l + r_{jj} + \sum_{k \notin \{i, j\} } ) \max (0, r_{ij}) & i \neq j\\
+	    \min ( 0, p_j + \phi_j^l + r_{jj} + \sum_{k \notin \{i, j\} } \max
+	    (0, r_{ij})) & i \neq j\\
 	\end{cases}$  \;
        Compute responsibilities 
 	$r_{ij}^{l > 1} = s_{ij}  + \min [ \tau_i^l, - \max_{k \neq j} (a_{ik} + s_{ik}) ]$\;
