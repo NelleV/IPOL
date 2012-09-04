@@ -66,11 +66,11 @@ void hierarchical_affinity_propagation(vector<double> similarity,
 
     // For the first iteration, lambda is equal to 0, ie we do not average
     // with the previous iteration; For the all the next iteration, we average
-    // two iterations one another
+    // two iterations one another.
 
     vector<vector<double> > tau;
     vector<vector<double> > phi;
-    // Initialise tau and phi for this iteration
+    // Initialise tau and phi to 0 for this iteration
     for(unsigned int l = 0; l < n_layers; l++){
       vector<double> t;
       vector<double> f;
@@ -85,24 +85,27 @@ void hierarchical_affinity_propagation(vector<double> similarity,
     // Compute tau for each layer
     for(unsigned int l = 0; l < n_layers - 1; l++){
       for(unsigned int j = 0; j < length; j++){
-        // calculate sum.
+        // calculate sum of positive responsabilities.
         double sum = 0;
+
         for(unsigned int k = 0; k < length; k++){
           if(k == j){
             continue;
           }
-          if(responsabilities[l][k * length + j] < 0){
+          if(responsabilities[l][k * length + j] > 0){
             sum = sum + responsabilities[l][k * length + j];
           }
         }
+
         tau[l + 1][j] = preferences[l][j] + responsabilities[l][j * length + j] + sum;
       }
-    }
+    } // layer
 
     // Compute phi for each layer
-    for(int l = 1; l < n_layers; l++){
+    for(unsigned int l = 1; l < n_layers; l++){
       for(unsigned int j = 0; j < length; j++){
 
+        // Initialize max with first element of the list, ie k == 0.
         double max = availabilities[l][j * length] + similarity[j * length];
 
         for(unsigned int k = 1; k < length; k++){
@@ -115,6 +118,7 @@ void hierarchical_affinity_propagation(vector<double> similarity,
     }
 
 
+    // Now, compute responsabilities and availabilities for all layers
     for(unsigned int l = 0; l < n_layers; l++){
       // Compute responsability
 
@@ -122,10 +126,9 @@ void hierarchical_affinity_propagation(vector<double> similarity,
         for(unsigned int i = 0; i < length; i++){
            // Compute the sum availibility + similarity for each line
           double AS[length];
-          for(unsigned int j = 0; j < length; j++){
-            AS[j] = availabilities[l][i * length + j] + similarity[i * length + j];
+          for(unsigned int k = 0; k < length; k++){
+            AS[k] = availabilities[l][i * length + k] + similarity[i * length + k];
           }
-          AS[i] = AS[i] + preferences[l][i];
 
           for(unsigned int j = 0; j < length; j++){
 
@@ -146,16 +149,8 @@ void hierarchical_affinity_propagation(vector<double> similarity,
               }
             }
 
-            if(i == j) {
-              responsabilities[l][i * length + j] = lambda * 
-                                                  responsabilities[l][i * length + j] +
-                                               (1 - lambda) * (preferences[l][i] - max);
-
-            } else {
-              responsabilities[l][i * length + j] = lambda * 
-                                                  responsabilities[l][i * length + j] +
-                                              (1 - lambda) * (similarity[i * length + j] - max);
-            }
+            responsabilities[l][i * length + j] = lambda * responsabilities[l][i * length + j] +
+                                            (1 - lambda) * (similarity[i * length + j] - max);
           } // Finished computation for line i
         } // Finished computation for layer 0
       } else {
@@ -186,13 +181,15 @@ void hierarchical_affinity_propagation(vector<double> similarity,
                 max = AS[k];
               }
             }
-            max = - max;
+            double min;
 
-            if(tau[l][i] < max){
-              max = tau[l][i];
+            if(tau[l][i] < - max){
+              min = tau[l][i];
+            } else {
+              min = - max;
             }
             responsabilities[l][i * length + j] = lambda * responsabilities[l][i * length + j] +
-                                (1 - lambda) * (similarity[i * length + j] + max);
+                                (1 - lambda) * (similarity[i * length + j] + min);
           }
         }
       }
@@ -205,15 +202,18 @@ void hierarchical_affinity_propagation(vector<double> similarity,
 
             double sum = 0.;
 
+            // Sum the positive responsabilities
             for(unsigned int k = 0; k < length; k++){
               if(k == i || k == j){
                 continue;
               }
-              if(responsabilities[l][k * length + j] > 0.){
+              if(responsabilities[l][k * length + j] > 0){
                 sum = sum + responsabilities[l][k * length + j];
               }
             }
 
+            sum = sum + preferences[l][j];
+            // i != j, then add responsabilities[j, j] to the sum
             double a = 0;
             if(i == j){
               a = sum;
@@ -263,15 +263,17 @@ void hierarchical_affinity_propagation(vector<double> similarity,
   // Compute the exemplars
   for(unsigned int l = 0; l < n_layers; l++){
     for(unsigned int i = 0; i < length; i++){
+
       double max = availabilities[l][i * length + 0] + responsabilities[l][i * length + 0];
-      exemplar[i + l * length] = 0;
+      exemplar[l * length + i] = 0;
       for(unsigned int j = 0; j < length; j++){
-        if(availabilities[l][i * length + j] + responsabilities[l][i * length + j] >= max){
+        if(availabilities[l][i * length + j] + responsabilities[l][i * length + j] > max){
           max = availabilities[l][i * length + j] + responsabilities[l][i * length + j];
           exemplar[i + l * length] = j;
         }
       }
+      cout << exemplar[i + l * length] << " ";
     }
+    cout << endl;
   }
 }
-
