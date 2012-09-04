@@ -47,30 +47,31 @@ Findings a small number of points that represents well a dataset is a critical
 step in pattern recognition. Exemplar-based clustering (EBC) not only performs
 clustering, ie partitions a set of datapoints into subsets that are similar in
 some sense, but also identifies for each cluster a point which represents the
-most that cluster. Those points are called exemplars.\\
+better that cluster. Those points are called exemplars.\\
 
-Traditional clustering techniques such as $k$-means start by randomly choosing a
-number of points from the dataset as cluster centers, and iteratively refine
+Traditional clustering techniques such as $k$-means start by randomly choosing
+a number of points from the dataset as cluster centers, and iteratively refine
 clusters by assigning labels to points, and re-evalutating cluster centers.
 Such methods, sensitive to the initialization, often fall in local minima, and
 have to be reran several times. \cite{frey07affinitypropagation} introduces
-Affinity propagation (AP), an algorithm that takes a novel approach by
+Affinity Propagation (AP), an algorithm that takes a novel approach by
 considering all datapoints as potential exemplars. By passing messages
 reflecting the affinity between datapoints, clusters and exemplars emerge
 gradually from the dataset. AP has been applied for various tasks in different
-domains: classify image, identify representative in a manuscript, or even
-detect genes in a microarray.\\
+domains: classify images, identify representative sentences in a manuscript,
+or even detect genes in a microarray.\\
 
 The AP was first extended to find a hierarchical structure in the data by
 \cite{Xiao07jointaffinity}. Hierarchical structure of the data implies that at
-layer $l$, only exemplars from layer $l - 1$ may be chosen as exemplars. The
-proposed algorithm builds the hierarchy of clusters by running the AP layer by
-layer. The greedy algorithm was found to suffer from making decisions in the
-lower levels that affected higher levels in a suboptimal way. \cite{hap} then
-proposed a new exemplar-based clustering algorithm by reformulating the
-objective function of AP, allowing to consider all layers at once. This
-algorithm is called Hierarchical Affinity Propagation (HAP), and has been
-shown to be more effective than the greedy version. \\
+layer $l$, only exemplars from layer $l - 1$ may be chosen as an exemplars.
+The algorithm presented in \cite{Xiao07jointaffinity} builds the hierarchy of
+clusters by running the AP layer by layer. The greedy algorithm was found to
+suffer from making decisions in the lower levels that affected higher levels
+in a suboptimal way. \cite{hap} then proposed a new exemplar-based clustering
+algorithm by reformulating the objective function of AP, allowing to consider
+all exemplars for all layers at once. This algorithm is called Hierarchical
+Affinity Propagation (HAP), and has been shown to be more effective than the
+greedy version. \\
 
 We will first review the standard AP model, before analyzing the HAP. We will
 then show examples of the HAP, underlying the strength and weaknesses of the
@@ -82,32 +83,38 @@ Let $N$ be the number of datapoints. Affinity propagation takes in input three
 elements: a squared matrix $N \times N$ representing \textbf{similarities}
 $(s_{ij})_{1 \leq i, j \leq N}$, a vector of size $N$ representing
 self-similarities or \textbf{preferences} $(p_i)_{1 \leq i \leq N}$ and a
-damping factor $\lambda$. \\
+damping factor $\lambda$, chosen between 0.5 and 1. \\
 
 The similarity $s_{ij}$ defines how well point $j$ is suited to be point $i$'s
-exemplar, ie how much $i$ and $j$ are similar. Affinity propagation does not
-require similarities to be symmetric. Intuitively, similarities $s_{ij}$ can
-be set to the negative euclidean distance between two points. \\
+exemplar, ie how much point $i$ and point $j$ are similar. Affinity
+propagation does not require similarities to be symmetric. Intuitively,
+similarities $s_{ij}$ can, for example, be set to the negative euclidean
+distance between two points. If a probabilistic model is available, one could
+also use the log likelihood of point $k$ being point $i$'s exemplar. Last, if
+appropriate, similarities can be set by hand. We assume that similarities are
+negative for the rest of the article.\\
 
-The preference $p_i$ sets how well $i$ is likely to be chosen as exemplar. Low
-preferences will yield a smaller number of exemplars, while high preferences
-will yield a large number of exemplars. Thought in some application, setting
-different preferences to point may be justified, there is often little reason
-to favor a priori one point other another. Hence, preferences can be set as
-the median for an average number of clusters, or to the minimum of the
-similarities, for a small number of clusters. \\
+The preference $p_i$ sets how well point $i$ is likely to be chosen as
+exemplar. Low preferences will yield a smaller number of exemplars, while high
+preferences will yield a large number of exemplars. Thought in some
+application, setting different preferences to point may be justified, there is
+often little reason to favor \textit{a priori} one point over another. Hence,
+preferences can be set as the median for an average number of clusters, or to
+the minimum of the similarities, for a small number of clusters. \\
 
 Let $(e_j)_{1 \leq j \leq N}$ be a set of hidden variable, where $e_j = 1$
-indicates that point $j$ has been chosen as an exemplar. Let $(h_{ij})_{1 <
-\leq i, j < N}$ be a set of hidden variable that chose that point $i$ has
-chosen point $j$ as it's exemplar. We can now set some constraints:
+indicates that point $j$ has been chosen as an exemplar. Let $(h_{ij})_{1 \leq
+i, j \leq N}$ be a set of hidden variable that shows that point $i$ has chosen
+point $j$ as its exemplar. We can now mathematically express some constraints:
 
 \begin{itemize}
-\item One point can choose only one exemplar:
+\item One point is part of only one cluster, ie, it can choose only one
+exemplar:
 \begin{equation*}
 \sum_{j} h_{ij} = 1.
 \end{equation*}
-\item If a point is an exemplar, than it is necessarily it's own exemplar
+\item If a point is an exemplar, it is necessarily its own exemplar: it can
+represent only the cluster he is part of:
 \begin{equation*}
 e_{j} = 1 \Rightarrow h_{jj} = 1.
 \end{equation*}
@@ -124,32 +131,37 @@ We can express the optimization problem as:
 \end{equation*}
 
 
-The second term of the objective function is a penalty term on the number of clusters, preventing the
-trivial solution of each point picking itself as exemplars. The higher the
-preference is, the more important the penalty on a point will be, the lower
-the probability of choosing this point as an examplar will be. This problem is
-NP hard. Hence, we will use an iterative and approximate algorithm inspired
-from the max sum algorithm to find exemplars. \\
+The first term of the objective function tries to maximize similarities
+between the datapoints and their exemplars. The second term of the objective
+function is a penalty term on the number of clusters, preventing the trivial
+solution of each point picking itself as exemplars. The higher the preference
+is, the more important the penalty on a point will be, the lower the
+probability of choosing this point as an examplar will be. This problem is NP
+hard. Hence, we will use an iterative and approximate algorithm inspired from
+the max sum algorithm to find exemplars. \\
 
 Two notions are derived from the similarities and preferences:
 \textbf{responsibilities} and \textbf{availabilities}. These two types of
-messages are computed iteratively until convergence.\\
+messages are computed iteratively and passed between each points until
+convergence. \\
 
-The responsibility $r_{ik}$ of data point $i$ to
-candidate exemplar $j$ corresponds to how well $k$ is suited to be an exemplar
-for $i$, compared to all the other exemplar candidates. The higher the
-similarity between points $i$ and points $j$, the higher should the
-responsibility be.
+The responsibility $r_{ik}$ of data point $i$ to candidate exemplar $j$
+corresponds to how well $k$ is suited to be an exemplar for $i$, compared to
+all the other exemplar candidates. The availability $a_{ik}$ of candidate
+exemplar $k$ to point $i$ shows how appropriate it is for $i$ to choose point
+$k$ as an exemplar. The self-availability $a_{kk}$ reflects the probability
+that point $k$ is an exemplar based on the positive responsibilities send from
+all points to $k$. \\
+
+The higher the similarity between points $i$ and points $j$, the higher should
+the responsibility be. The responsibilities are computed with:
 \begin{equation*}
-r_{ij} = s_{ij} - \max_{k \neq j} (a_{ik} + s_{ik}).
-\end{equation*}
-\\
+r_{ij} = s_{ij} - \max_{k \neq j}
+(a_{ik} + s_{ik}).
+\end{equation*} \\
 
-The availability $a_{ik}$ of candidate exemplar $k$ to point $i$ shows how
-appropriate it is for $i$ to choose point $k$ as an exemplar; it takes in account
-all the other points $j$ that would take $k$ as an exemplar. The
-self-availability $a_{kk}$ reflects the probability that point $k$ is an
-exemplar based on the positive responsibility send from all points to $k$.
+The availability $a_{ik}$  takes in account all the other points $j$ that
+would take $k$ as an exemplar.
 
 \begin{equation*}
 a_{ij} = \begin{cases}
@@ -182,6 +194,7 @@ identical over 10 iterations. We choose to do a fixed number of iterations.
 
 \begin{algorithm}[h]
   \SetLine
+  Input: similarities $s_{ij}$, preferences $p_i$, dumping factor $\lambda$, \;
   initialization\;
   \For{iteration}{
     Compute availabilities $a_{ij} = \begin{cases}
