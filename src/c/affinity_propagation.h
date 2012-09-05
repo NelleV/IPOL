@@ -3,7 +3,7 @@
 void hierarchical_affinity_propagation(vector <double> image,
                 unsigned int line,
                 unsigned int n_layers,
-                unsigned int exemplar[],
+                vector< vector<unsigned int> > &exemplar,
                 double lambda, int max_iter);
 
 class HierarchicalAffinityPropagation{
@@ -27,11 +27,13 @@ class HierarchicalAffinityPropagation{
                                       vector <unsigned int> exemplar,
                                       double lambda,
                                       unsigned int max_iter);
+      void fit();
 
   private:
     void update_responsabilities(unsigned int l);
     void update_availabilities(unsigned int l);
     void compute_preferences();
-    void update_tau();
-    void update_phi();
+    void update_tau(unsigned int l);
+    void update_phi(unsigned int l);
+    void update_exemplars();
 };

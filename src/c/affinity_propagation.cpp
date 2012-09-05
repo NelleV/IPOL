@@ -13,7 +13,8 @@ using namespace std;
  *
  **/
 void hierarchical_affinity_propagation(vector<double> similarity,
-    unsigned int length, unsigned int n_layers, unsigned int exemplar[],
+    unsigned int length, unsigned int n_layers, 
+    vector<vector<unsigned int> > &exemplar,
     double lambda, int max_iter){
 
   cout << "Affinity Propagation" << endl;
@@ -34,10 +35,13 @@ void hierarchical_affinity_propagation(vector<double> similarity,
   vector<vector<double> > preferences;
   for(unsigned int l = 0; l < n_layers; l++){
     vector<double> lpref;
+    vector <unsigned int> ex;
     for(unsigned int i = 0; i < length; i++){
       lpref.push_back(preference);
+      ex.push_back(0);
     }
     preferences.push_back(lpref);
+    exemplar.push_back(ex);
   }
 
   // Availabity and responsability
@@ -62,6 +66,7 @@ void hierarchical_affinity_propagation(vector<double> similarity,
 
   // Compute the hierarchical affinity propagation
   for(unsigned int it = 0; it < max_iter; it++){
+    cout << it << endl;
 
     // For the first iteration, lambda is equal to 0, ie we do not average
     // with the previous iteration; For the all the next iteration, we average
@@ -113,7 +118,6 @@ void hierarchical_affinity_propagation(vector<double> similarity,
         phi[l - 1][j] = lambda * phi[l - 1][j] * (1 - lambda ) * max;
       }
     }
-
 
     for(unsigned int l = 0; l < n_layers; l++){
       // Compute responsability
@@ -263,17 +267,21 @@ void hierarchical_affinity_propagation(vector<double> similarity,
   // Compute the exemplars
   for(unsigned int l = 0; l < n_layers; l++){
     for(unsigned int i = 0; i < length; i++){
-      double max = availabilities[l][i * length + 0] + responsabilities[l][i * length + 0];
-      exemplar[i + l * length] = 0;
+      double max = availabilities[l][i * length + 0] +
+                   responsabilities[l][i * length + 0];
+      exemplar[l][i] = 0;
       for(unsigned int j = 0; j < length; j++){
-        if(availabilities[l][i * length + j] + responsabilities[l][i * length + j] >= max){
-          max = availabilities[l][i * length + j] + responsabilities[l][i * length + j];
-          exemplar[i + l * length] = j;
+        if(availabilities[l][i * length + j] +
+           responsabilities[l][i * length + j] >= max){
+          max = availabilities[l][i * length + j] +
+                responsabilities[l][i * length + j];
+          exemplar[l][i] = j;
         }
       }
     }
   }
 }
+
 
 HierarchicalAffinityPropagation::HierarchicalAffinityPropagation(
     vector <double> similarities, unsigned int length,
@@ -318,6 +326,7 @@ HierarchicalAffinityPropagation::HierarchicalAffinityPropagation(
   compute_preferences();
 }
 
+
 void HierarchicalAffinityPropagation::compute_preferences(){
   // Compute preferences
   // Need to copy the similarity array to sort it, in order to get the median
@@ -341,6 +350,7 @@ void HierarchicalAffinityPropagation::compute_preferences(){
     preferences.push_back(lpref);
   }
 }
+
 
 void HierarchicalAffinityPropagation::update_responsabilities(unsigned int l){
   if(l == 0){
@@ -424,6 +434,7 @@ void HierarchicalAffinityPropagation::update_responsabilities(unsigned int l){
   }
 }
 
+
 void HierarchicalAffinityPropagation::update_availabilities(unsigned int l){
   if(l == n_layers - 1) {
     // Compute availibility for l = L
@@ -487,10 +498,79 @@ void HierarchicalAffinityPropagation::update_availabilities(unsigned int l){
 }
 
 
-void HierarchicalAffinityPropagation::update_phi(){
+void HierarchicalAffinityPropagation::update_phi(unsigned int l){
+  for(unsigned int j = 0; j < length; j++){
 
+    double max = availabilities[l][j * length] + similarities[j * length];
+
+    for(unsigned int k = 1; k < length; k++){
+      if(availabilities[l][j * length + k] + similarities[j * length + k] > max){
+        max = availabilities[l][j * length + k] + similarities[j * length + k];
+      }
+    }
+    phi[l - 1][j] = lambda * phi[l - 1][j] * (1 - lambda ) * max;
+  }
 }
 
-void HierarchicalAffinityPropagation::update_tau(){
 
+void HierarchicalAffinityPropagation::update_tau(unsigned int l){
+  for(unsigned int j = 0; j < length; j++){
+    // calculate sum.
+    double sum = 0;
+    for(unsigned int k = 0; k < length; k++){
+      if(k == j){
+        continue;
+      }
+      if(responsabilities[l][k * length + j] < 0){
+        sum = sum + responsabilities[l][k * length + j];
+      }
+    }
+    tau[l + 1][j] = lambda * tau[l + 1][j] + 
+      (1 - lambda) *  preferences[l][j] + responsabilities[l][j * length + j] + sum;
+  }
+}
+
+void HierarchicalAffinityPropagation::update_exemplars(){
+  // Compute the exemplars
+  for(unsigned int l = 0; l < n_layers; l++){
+    for(unsigned int i = 0; i < length; i++){
+      double max = availabilities[l][i * length + 0] +
+                   responsabilities[l][i * length + 0];
+      exemplar[i + l * length] = 0;
+      for(unsigned int j = 0; j < length; j++){
+        if(availabilities[l][i * length + j] +
+           responsabilities[l][i * length + j] >= max){
+          max = availabilities[l][i * length + j] +
+                responsabilities[l][i * length + j];
+          exemplar[i + l * n_layers] = j;
+        }
+      }
+    }
+  }
+}
+
+void HierarchicalAffinityPropagation::fit(){
+  unsigned int internal_loop_iter = 10;
+
+  for(unsigned int it = 0; it < max_iter; it++){
+    // Go up then down
+    for(unsigned int l = 0; l < n_layers; l++){
+      // internal loop 
+      for(unsigned int ilit = 0; it < internal_loop_iter; ilit++){
+        this->update_responsabilities(l);
+        this->update_availabilities(l);
+      }
+      this->update_tau(l);
+    }
+
+    // Now go down
+    for(unsigned int l = n_layers - 1; l >= 0; l--){
+      //internal loop
+      for(unsigned ilit = 0; it < internal_loop_iter; ilit++){
+        this->update_availabilities(l);
+        this->update_responsabilities(l);
+      }
+      this->update_phi(l);
+    }
+  }
 }
