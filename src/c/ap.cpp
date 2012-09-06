@@ -71,7 +71,7 @@ int main(int argc, char ** argv){
 
   vector<double> matrix = reader.read();
 
-  unsigned int results [reader.num_line * opts.n_layers];
+  vector <vector <unsigned int> > results;
   hierarchical_affinity_propagation(matrix, reader.num_line,
             opts.n_layers, results, opts.lambda, 200);
 

@@ -57,7 +57,7 @@ CSVWriter::~CSVWriter(){
   this->file.close();
 }
 
-bool CSVWriter::write(unsigned int result[],
+bool CSVWriter::write(vector< vector<unsigned int> > result,
                       unsigned int num_line,
                       unsigned int n_layers){
 
@@ -65,9 +65,9 @@ bool CSVWriter::write(unsigned int result[],
     for(unsigned int l = 0; l < n_layers; l++){
       char buffer[100];
       if(l == n_layers - 1){
-        sprintf(buffer, "%u\n\0", result[i + l * num_line]);
+        sprintf(buffer, "%u\n\0", result[l][i]);
       }else{
-        sprintf(buffer, "%u \0", result[i + l * num_line]);
+        sprintf(buffer, "%u \0", result[l][i]);
       }
       unsigned int j = 0;
       while(buffer[j] != '\0'){
