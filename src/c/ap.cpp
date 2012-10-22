@@ -72,8 +72,13 @@ int main(int argc, char ** argv){
   vector<double> matrix = reader.read();
 
   vector <vector <unsigned int> > results;
-  hierarchical_affinity_propagation(matrix, reader.num_line,
-            opts.n_layers, results, opts.lambda, 200);
+  HierarchicalAffinityPropagation * HAP = new HierarchicalAffinityPropagation(
+                                          matrix, reader.num_line,
+                                          opts.n_layers, 
+                                          opts.lambda, 200);
+  HAP->fit(results);
+  // hierarchical_affinity_propagation(matrix, reader.num_line,
+  //           opts.n_layers, results, opts.lambda, 200);
 
   CSVWriter writer(opts.output_file);
   writer.write(results, reader.num_line, opts.n_layers);

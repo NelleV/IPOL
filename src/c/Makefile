@@ -9,7 +9,7 @@ OBJS = csv.o \
        ap.o
 
 
-CXXFLAGS = -O3
+CXXFLAGS = -g
 
 CXX = g++
 
